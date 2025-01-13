@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "MikroTik" ALTER COLUMN "since" SET DATA TYPE TEXT;

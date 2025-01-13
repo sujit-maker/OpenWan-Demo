@@ -1,0 +1,158 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  username   String   @unique
+  password   String
+  usertype   UserType
+  emailId    Json?
+  customerId Int?
+  siteId     Int?
+  createdAt  DateTime @default(now())
+
+  customer Customer? @relation(fields: [customerId], references: [id])
+  site     Site?     @relation(fields: [siteId], references: [id])
+
+  // Self-referential relations
+  manager    User?  @relation("UserManager", fields: [managerId], references: [id])
+  managerId  Int?
+  executives User[] @relation("UserManager")
+
+  admin   User? @relation("UserAdmin", fields: [adminId], references: [id])
+  adminId Int?
+
+  admins User[] @relation("UserAdmin")
+
+  // Relation to Customer for the admin
+  customers        Customer[] @relation("UserAdmin") // Relation for admin customers
+  managedCustomers Customer[] @relation("UserManager") // Add this line for manager relation
+
+  // Relations to Site model
+  managedSites Site[] @relation("SiteManager")
+  adminSites   Site[] @relation("SiteAdmin")
+
+  // Relations to Device model
+  managedDevices Device[] @relation("DeviceManager")
+  adminDevices   Device[] @relation("DeviceAdmin")
+
+  deviceId String? // Optional string field for device ID
+  device   Device? @relation(fields: [deviceId], references: [deviceId])
+}
+
+enum UserType {
+  ADMIN
+  MANAGER
+  EXECUTIVE
+  SUPERADMIN
+}
+
+model Service {
+  id          Int    @id @default(autoincrement())
+  serviceId   String @unique
+  serviceName String @unique
+  description String
+  tasks       Task[]
+}
+
+model Customer {
+  id              Int    @id @default(autoincrement())
+  customerName    String @unique
+  customerAddress String
+  gstNumber       String
+  contactName     String
+  contactNumber   String
+  email           String
+  sites           Site[] // Assuming this is a related model
+  tasks           Task[] // Assuming this is a related model
+  adminId         Int? // Foreign key to the User model for the admin
+  managerId       Int? // Foreign key to the User model for the manager
+
+  user    User[]
+  // Relations to the User model for admin and manager
+  admin   User?  @relation("UserAdmin", fields: [adminId], references: [id])
+  manager User?  @relation("UserManager", fields: [managerId], references: [id])
+}
+
+model Site {
+  id            Int      @id @default(autoincrement())
+  customer      Customer @relation(fields: [customerId], references: [id])
+  customerId    Int
+  siteName      String   @unique
+  siteAddress   String
+  contactName   String
+  contactNumber String
+  contactEmail  String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  tasks         Task[]
+  device        Device[]
+
+  // Foreign keys for admin and manager
+  adminId   Int?
+  managerId Int?
+  user      User[]
+
+  // Relations to User model for admin and manager
+  admin     User?  @relation("SiteAdmin", fields: [adminId], references: [id])
+  manager   User?  @relation("SiteManager", fields: [managerId], references: [id])
+}
+
+enum ServiceType {
+  AMC
+  OnDemandSupport
+  NewInstallation
+}
+
+model Device {
+  id             Int    @id @default(autoincrement())
+  deviceId       String @unique
+  deviceName     String
+  site           Site   @relation(fields: [siteId], references: [id])
+  siteId         Int
+  deviceType     String
+  deviceIp       String
+  devicePort     String
+  portCount      String
+  emailId        Json?
+  deviceUsername String
+  devicePassword String
+
+  managerId Int? // Foreign key to the User model for the manager
+  adminId   Int? // Foreign key to the User model for the admin
+
+  // Relations to the User model for admin and manager
+  admin   User? @relation("DeviceAdmin", fields: [adminId], references: [id])
+  manager User? @relation("DeviceManager", fields: [managerId], references: [id])
+
+  user User[] // Add this field to complete the relation
+}
+
+model Task {
+  id          Int         @id @default(autoincrement())
+  customerId  Int
+  siteId      Int
+  serviceId   Int
+  description String
+  date        DateTime
+  remark      String?
+  serviceType ServiceType
+  customer    Customer    @relation(fields: [customerId], references: [id])
+  site        Site        @relation(fields: [siteId], references: [id])
+  service     Service     @relation(fields: [serviceId], references: [id])
+}
+
+model MikroTik {
+  id        Int      @id @default(autoincrement())
+  identity  String
+  comment   String
+  status    String
+  since     String
+  createdAt DateTime @default(now())
+}

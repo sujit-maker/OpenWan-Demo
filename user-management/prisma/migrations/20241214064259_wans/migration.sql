@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Device" ADD COLUMN     "wan1Enabled" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "wan2Enabled" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "wan3Enabled" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "wan4Enabled" BOOLEAN NOT NULL DEFAULT false;
