@@ -49,6 +49,11 @@ async getDevices(@Param('userId') userId: string) {
     }
   }
 
+  @Get('count')
+  async getAllDeviceCount() {
+    return this.devicesService.countAllDevices();
+  }
+
   @Get('manager')
   async countByManagerId(@Query('managerId') managerId: string) {
     const managerIdNumber = parseInt(managerId, 10);
@@ -75,6 +80,32 @@ async getDevices(@Param('userId') userId: string) {
     // Call the fetchAllData method to get all merged data
     return this.mikrotikService.fetchAllData(routerUrl, auth);
   }
+
+  @Post('test/data')
+  async testDevice(@Body() body: { username: string; password: string; port: string; ip: string }) {
+    const { username, password, port, ip } = body;
+  
+    // Validate the input
+    if (!username || !password || !port || !ip) {
+      throw new BadRequestException('Missing required fields: username, password, ip, or port');
+    }
+  
+    // Build the router URL
+    const routerUrl = `http://${ip}:${port}`;
+    const auth = { username, password };
+  
+    try {
+      // Call the testData method to fetch data from the MikroTik router
+      const data = await this.mikrotikService.testData(); // Ensure this method is called with 2 arguments
+      return data; // Return the merged data from the MikroTik router
+    } catch (error) {
+      // Handle errors and send a response
+      throw new BadRequestException('Failed to fetch data from the device');
+    }
+  }
+  
+  
+
 
   @Get('site/:siteId')
 async findBySiteId(@Param('siteId') siteId: string) {

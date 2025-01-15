@@ -20,7 +20,7 @@ export interface User {
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async getCustomerByUserId(adminId: number): Promise<Customer> {
     const user = await this.prisma.user.findUnique({
@@ -29,39 +29,40 @@ export class UserService {
         customer: true, // Include the full customer data
       },
     });
-  
+
     if (!user || !user.customer) {
       throw new Error('User or Customer not found');
     }
-  
+
     // Return the complete customer data
     return user.customer;
   }
 
   async getSitesByManagerId(managerId: number): Promise<Site[]> {
-    // Fetch the manager's details, including their customerId
+    // Fetch the manager's details, including their siteId
     const manager = await this.prisma.user.findUnique({
       where: { id: managerId },
-      include: { customer: true }, // Ensure customer relation is loaded
+      select: { siteId: true, usertype: true }, // Select only the necessary fields
     });
-  
-    if (!manager || manager.usertype !== 'MANAGER' || !manager.customerId) {
-      throw new Error('Invalid Manager ID or no associated customer');
+
+    if (!manager || manager.usertype !== 'MANAGER' || !manager.siteId) {
+      throw new Error('Invalid Manager ID or no associated site ID');
     }
-  
-    // Fetch all sites associated with the manager's customerId
-    const sites = await this.prisma.site.findMany({
-      where: { customerId: manager.customerId },
+
+    // Fetch the site that matches the manager's siteId
+    const site = await this.prisma.site.findUnique({
+      where: { id: manager.siteId },
     });
-  
-    if (!sites.length) {
-      throw new Error('No sites found for the given manager');
+
+    if (!site) {
+      throw new Error('No site found for the given manager');
     }
-  
-    return sites;
+
+    return [site]; // Returning as an array to maintain consistency
   }
-  
-  
+
+
+
   async getSitesByAdmin(adminId: number): Promise<Site[]> {
     // Step 1: Fetch the customerId associated with the given adminId
     const adminUser = await this.prisma.user.findUnique({
@@ -70,50 +71,26 @@ export class UserService {
         customerId: true,
       },
     });
-  
+
     // Check if adminUser exists and has a customerId
     if (!adminUser || !adminUser.customerId) {
       throw new Error('Admin user not found or does not have an associated customerId');
     }
-  
+
     const customerId = adminUser.customerId;
-  
+
     // Step 2: Fetch all sites associated with the retrieved customerId
     const sites = await this.prisma.site.findMany({
       where: { customerId },
     });
-  
+
     // If no sites are found, return an empty array or throw an error based on your preference
     if (!sites || sites.length === 0) {
       throw new Error(`No sites found for customerId: ${customerId}`);
     }
-  
+
     return sites;
   }
-  
- 
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
   async getDevicesByManagerId(managerId: number): Promise<Site[]> {
@@ -121,53 +98,60 @@ export class UserService {
     const manager = await this.prisma.user.findUnique({
       where: { id: managerId },
     });
-  
+
     if (!manager || manager.usertype !== 'MANAGER') {
       throw new Error('Invalid Manager ID or no associated sites');
     }
-  
+
     // Fetch sites associated with the managerId
     const sites = await this.prisma.site.findMany({
       where: { managerId },
     });
-  
+
     if (sites.length === 0) {
       throw new Error('No sites found for the given manager');
     }
-  
+
     return sites;
   }
-  
-  
-  
-  async getDevicesByAdmin(adminId: number): Promise<Device[]> {
-    // Ensure adminId is valid
-    const admin = await this.prisma.user.findUnique({
-      where: { id: adminId },
+
+
+
+  async getDevicesByCustomerId(userId: number): Promise<Device[]> {
+    // Fetch the user and ensure they are associated with a customer
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { customerId: true },
     });
-  
-    if (!admin || admin.usertype !== 'ADMIN') {
-      throw new Error('Invalid Admin ID or no associated sites');
+
+    if (!user || !user.customerId) {
+      throw new Error('User is not associated with a customer');
     }
-  
-    // Fetch devices from sites associated with the admin
+
+    const customerId = user.customerId;
+
+    // Get all sites linked to the customer
+    const sites = await this.prisma.site.findMany({
+      where: { customerId },
+      select: { id: true },
+    });
+
+    if (sites.length === 0) {
+      throw new Error('No sites found for the given customer');
+    }
+
+    // Extract site IDs
+    const siteIds = sites.map((site) => site.id);
+
+    // Get all devices linked to the sites
     const devices = await this.prisma.device.findMany({
-      where: {
-        site: {
-          adminId: adminId, // Check if the site's adminId matches
-        },
-      },
+      where: { siteId: { in: siteIds } },
     });
-  
-    if (!devices.length) {
-      throw new Error('No devices found for the given admin');
-    }
-  
+
     return devices;
   }
-  
-  
-  
+
+
 
 
   async create(createUserDto: CreateUserDto) {
@@ -211,7 +195,7 @@ export class UserService {
     managerId?: number,
     adminId?: number,
   ) {
-    const { username, password, usertype, customerId, siteId,emailId } = createUserDto;
+    const { username, password, usertype, customerId, siteId, emailId } = createUserDto;
 
     // Check if username already exists
     const userExists = await this.prisma.user.findUnique({
@@ -234,6 +218,8 @@ export class UserService {
       customerId,
       siteId,
     };
+
+    
 
     // Connect the admin if the usertype is MANAGER and adminId is provided
     if (usertype === UserType.MANAGER && adminId) {
@@ -350,7 +336,7 @@ export class UserService {
         id: true,
         username: true,
         usertype: true,
-        emailId:true,
+        emailId: true,
         managerId: true,
         adminId: true,
         deviceId: true,

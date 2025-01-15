@@ -20,7 +20,7 @@ model User {
   customer Customer? @relation(fields: [customerId], references: [id])
   site     Site?     @relation(fields: [siteId], references: [id])
 
-  // Self-referential relations
+  
   manager    User?  @relation("UserManager", fields: [managerId], references: [id])
   managerId  Int?
   executives User[] @relation("UserManager")
@@ -30,19 +30,19 @@ model User {
 
   admins User[] @relation("UserAdmin")
 
-  // Relation to Customer for the admin
-  customers        Customer[] @relation("UserAdmin") // Relation for admin customers
-  managedCustomers Customer[] @relation("UserManager") // Add this line for manager relation
+  
+  customers        Customer[] @relation("UserAdmin") 
+  managedCustomers Customer[] @relation("UserManager") 
 
-  // Relations to Site model
+  
   managedSites Site[] @relation("SiteManager")
   adminSites   Site[] @relation("SiteAdmin")
 
-  // Relations to Device model
+  
   managedDevices Device[] @relation("DeviceManager")
   adminDevices   Device[] @relation("DeviceAdmin")
 
-  deviceId String? // Optional string field for device ID
+  deviceId String? 
   device   Device? @relation(fields: [deviceId], references: [deviceId])
 }
 
@@ -69,13 +69,13 @@ model Customer {
   contactName     String
   contactNumber   String
   email           String
-  sites           Site[] // Assuming this is a related model
-  tasks           Task[] // Assuming this is a related model
-  adminId         Int? // Foreign key to the User model for the admin
-  managerId       Int? // Foreign key to the User model for the manager
+  sites           Site[] 
+  tasks           Task[] 
+  adminId         Int? 
+  managerId       Int? 
 
   user    User[]
-  // Relations to the User model for admin and manager
+  
   admin   User?  @relation("UserAdmin", fields: [adminId], references: [id])
   manager User?  @relation("UserManager", fields: [managerId], references: [id])
 }
@@ -94,12 +94,12 @@ model Site {
   tasks         Task[]
   device        Device[]
 
-  // Foreign keys for admin and manager
+  
   adminId   Int?
   managerId Int?
   user      User[]
 
-  // Relations to User model for admin and manager
+  
   admin     User?  @relation("SiteAdmin", fields: [adminId], references: [id])
   manager   User?  @relation("SiteManager", fields: [managerId], references: [id])
 }
@@ -124,14 +124,14 @@ model Device {
   deviceUsername String
   devicePassword String
 
-  managerId Int? // Foreign key to the User model for the manager
-  adminId   Int? // Foreign key to the User model for the admin
+  managerId Int? 
+  adminId   Int? 
 
-  // Relations to the User model for admin and manager
+  
   admin   User? @relation("DeviceAdmin", fields: [adminId], references: [id])
   manager User? @relation("DeviceManager", fields: [managerId], references: [id])
 
-  user User[] // Add this field to complete the relation
+  user User[] 
 }
 
 model Task {

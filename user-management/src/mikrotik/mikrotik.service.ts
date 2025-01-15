@@ -1,8 +1,20 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import axios from 'axios';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class MikroTikService {
+
+  constructor(private readonly prisma: PrismaService) {}
+
+
+  private readonly defaultConfig = {
+    username: 'admin',
+    password: 'Enpl@253000',
+    ip: 'opw1.openwan.in',
+    port: '91',
+  };
+  
   private createAuthHeader(auth: { username: string; password: string }) {
     return `Basic ${Buffer.from(`${auth.username}:${auth.password}`).toString('base64')}`;
   }
@@ -33,6 +45,7 @@ export class MikroTikService {
       'tool/netwatch',
       'ip/address',
       'ip/arp',
+      'ppp/active',
     ];
 
     try {
@@ -53,6 +66,58 @@ export class MikroTikService {
       );
     }
   }
+
+ // Method to fetch active PPP users and match them with devices in the database
+ async testData() {
+  const { username, password, ip, port } = this.defaultConfig;
+
+  const routerUrl = `http://${ip}:${port}`;
+  const auth = { username, password };
+
+  const endpoints = ['ppp/active'];
+
+  try {
+    const authHeader = this.createAuthHeader(auth);
+
+    // Fetch data from MikroTik's 'ppp/active' endpoint
+    const requests = endpoints.map((endpoint) =>
+      axios.get(`${routerUrl}/rest/${endpoint}`, { headers: { Authorization: authHeader } })
+    );
+
+    const responses = await Promise.all(requests);
+    const activeData = responses[0].data; // Assuming we only need data from 'ppp/active'
+
+    // Fetch all devices from the database
+    const devices = await this.prisma.device.findMany();
+
+    // Create a set of active device names (ppp/active names)
+    const activeDeviceNames = new Set(activeData.map((user) => user.name));
+
+    // Count the online and offline devices
+    let onlineCount = 0;
+    let offlineCount = 0;
+
+    devices.forEach((device) => {
+      if (activeDeviceNames.has(device.deviceId)) {
+        onlineCount += 1; // Device is online
+      } else {
+        offlineCount += 1; // Device is offline
+      }
+    });
+
+    // Return the count of online and offline devices
+    return {
+      onlineDevices: onlineCount,
+      offlineDevices: offlineCount,
+    };
+  } catch (error) {
+    console.error('Error fetching active devices:', error);
+    throw new HttpException(
+      `Failed to fetch active devices or match with the database: ${error.message}`,
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+}
 
   // Method to fetch data from a specific endpoint
   async fetchEndpointData(routerUrl: string, auth: { username: string; password: string }, endpoint: string) {

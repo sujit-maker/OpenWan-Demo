@@ -82,7 +82,7 @@ const CreateDeviceModal: React.FC<CreateDeviceModalProps> = ({
         try {
           // Fetch adminId associated with the logged-in manager
           const response = await fetch(
-            `http://122.169.108.252:8000/users/admins/manager?managerId=${loggedInManagerId}`
+            `http://localhost:8000/users/admins/manager?managerId=${loggedInManagerId}`
           );
           const data = await response.json();
           setAdminId(data[0]?.id || ""); // Set adminId from the API response
@@ -98,7 +98,7 @@ const CreateDeviceModal: React.FC<CreateDeviceModalProps> = ({
   const fetchAdmins = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://122.169.108.252:8000/users/admins");
+      const response = await fetch("http://localhost:8000/users/admins");
       const data: User[] = await response.json();
       setAdmins(data);
     } catch (error) {
@@ -149,7 +149,7 @@ const CreateDeviceModal: React.FC<CreateDeviceModalProps> = ({
     try {
       // Use the managerId in the query string to fetch sites
       const response = await fetch(
-        `http://122.169.108.252:8000/site?managerId=${managerId}`
+        `http://localhost:8000/site?managerId=${managerId}`
       );
       if (response.ok) {
         const data: Site[] = await response.json();
@@ -170,7 +170,7 @@ const CreateDeviceModal: React.FC<CreateDeviceModalProps> = ({
     setIsLoading(true);
     try {
       const response = await fetch(
-        `http://122.169.108.252:8000/users/managers/admin?adminId=${adminId}`
+        `http://localhost:8000/users/managers/admin?adminId=${adminId}`
       );
       const data: User[] = await response.json();
       setManagers(Array.isArray(data) ? data : []); // Ensure it's an array
@@ -223,7 +223,7 @@ const CreateDeviceModal: React.FC<CreateDeviceModalProps> = ({
 
     try {
       setIsLoading(true);
-      const response = await fetch("http://122.169.108.252:8000/devices", {
+      const response = await fetch("http://localhost:8000/devices", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

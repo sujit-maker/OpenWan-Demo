@@ -2,40 +2,59 @@
 
 import React, { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
-import { useAuth } from "../hooks/useAuth";
+import axios from "axios";
 
 const Dashboard: React.FC = () => {
-  const { currentUserType, adminId } = useAuth();
-  const [managersCount, setManagersCount] = useState<number | null>(null);
-  const [adminUserCount, setAdminUserCount] = useState<number | null>(null);
+  const [customerCount, setCustomerCount] = useState<number | null>(null);
+  const [siteCount, setSiteCount] = useState<number | null>(null);
+  const [deviceCount, setDeviceCount] = useState<number | null>(null);
+  const [onlineDevice, setOnlineDevice] = useState<number | null>(null);
+  const [offlineDevice, setOfflineDevice] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const body = {
+    username: "admin",
+    password: "Enpl@253000",
+    ip: "opw1.openwan.in",
+    port: "91",
+  };
+
+  // Fetch data for online and offline devices
+  useEffect(() => {
+    axios
+      .post(`http://localhost:8000/devices/test/data`, body)
+      .then((response) => {
+        // Update online and offline device counts
+        setOnlineDevice(response.data.onlineDevices);
+        setOfflineDevice(response.data.offlineDevices);
+      })
+      .catch((error) => {
+        console.error("Error fetching device data:", error);
+        setError("Failed to fetch device data.");
+      });
+  }, []);
+
+  // Fetch other data (customer count, site count, etc.)
+  useEffect(() => {
+    axios
+      .get(`http://localhost:8000/customers/count`)
+      .then((response) => setCustomerCount(response.data.count))
+      .catch((error) => console.error("Error fetching customer count:", error));
+  }, []);
 
   useEffect(() => {
-    const fetchUserCounts = async () => {
-      try {
-        if (currentUserType === "SUPERADMIN") {
-          // Fetch data for SUPERADMIN
-          const response = await fetch(`http://localhost:8000/users/counts`);
-          const data = await response.json();
-          if (data.managers && data.admins) {
-            setManagersCount(data.managers);
-            setAdminUserCount(data.admins);
-          }
-        } else if (currentUserType === "ADMIN" && adminId) {
-          // Fetch data for ADMIN
-          const response = await fetch(
-            `http://localhost:8000/users/count/admin/${adminId}`
-          );
-          const data = await response.json();
-          setManagersCount(data);
-          setAdminUserCount(null); // Clear SUPERADMIN data
-        }
-      } catch (error) {
-        console.error("Error fetching user counts:", error);
-      }
-    };
+    axios
+      .get(`http://localhost:8000/site/count`)
+      .then((response) => setSiteCount(response.data.count))
+      .catch((error) => console.error("Error fetching site count:", error));
+  }, []);
 
-    fetchUserCounts();
-  }, [currentUserType, adminId]);
+  useEffect(() => {
+    axios
+      .get(`http://localhost:8000/devices/count`)
+      .then((response) => setDeviceCount(response.data.count))
+      .catch((error) => console.error("Error fetching device count:", error));
+  }, []);
 
   return (
     <div className="flex h-screen">
@@ -47,38 +66,45 @@ const Dashboard: React.FC = () => {
             Dashboard
           </h1>
 
-          <div className="flex flex-wrap justify-center md:justify-center gap-6">
-            {currentUserType === "SUPERADMIN" && (
-              <>
-                {adminUserCount !== null && (
-                  <div className="w-full sm:w-[300px] bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-lg shadow-xl transform transition duration-500 hover:scale-105 p-6 flex flex-col items-center justify-center text-white">
-                    <h3 className="text-lg font-semibold text-center">
-                      Admins Count
-                    </h3>
-                    <p className="text-4xl font-bold mt-2">{adminUserCount}</p>
-                  </div>
-                )}
-                {managersCount !== null && (
-                  <div className="w-full sm:w-[300px] bg-gradient-to-r from-green-400 via-teal-500 to-blue-500 rounded-lg shadow-xl transform transition duration-500 hover:scale-105 hover:shadow-2xl p-6 flex flex-col items-center justify-center text-white">
-                    <h3 className="text-lg font-semibold text-center">
-                      Managers Count
-                    </h3>
-                    <p className="text-4xl font-bold mt-2">{managersCount}</p>
-                  </div>
-                )}
-              </>
+          {error && (
+            <div className="text-red-500 text-center mb-4">{error}</div>
+          )}
+
+          <div className="flex flex-wrap  justify-center gap-6">
+            {customerCount !== null && (
+              <Card
+                title="Customers Count"
+                count={customerCount}
+                gradient="bg-yellow-600"
+              />
             )}
-            {currentUserType === "ADMIN" && (
-              <>
-                {managersCount !== null && (
-                  <div className="w-full sm:w-[300px] bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 rounded-lg shadow-xl transform transition duration-500 hover:scale-105 hover:shadow-2xl p-6 flex flex-col items-center justify-center text-white">
-                    <h3 className="text-lg font-semibold text-center">
-                      Managers Count
-                    </h3>
-                    <p className="text-4xl font-bold mt-2">{managersCount}</p>
-                  </div>
-                )}
-              </>
+            {siteCount !== null && (
+              <Card
+                title="Sites Count"
+                count={siteCount}
+                gradient="bg-yellow-600"
+              />
+            )}
+            {deviceCount !== null && (
+              <Card
+                title="Devices Count"
+                count={deviceCount}
+                gradient="bg-yellow-600"
+              />
+            )}
+            {onlineDevice !== null && (
+              <Card
+                title="Online Devices"
+                count={onlineDevice}
+                gradient="bg-green-600 "
+              />
+            )}
+            {offlineDevice !== null && (
+              <Card
+                title="Offline Devices"
+                count={offlineDevice}
+                gradient="bg-red-600"
+              />
             )}
           </div>
         </div>
@@ -86,5 +112,20 @@ const Dashboard: React.FC = () => {
     </div>
   );
 };
+
+interface CardProps {
+  title: string;
+  count: number;
+  gradient: string;
+}
+
+const Card: React.FC<CardProps> = ({ title, count, gradient }) => (
+  <div
+    className={`w-full sm:w-[300px] bg-gradient-to-r ${gradient} rounded-lg shadow-xl transform transition duration-500 hover:scale-105 hover:shadow-2xl p-6 flex flex-col items-center justify-center text-white`}
+  >
+    <h3 className="text-lg font-semibold text-center">{title}</h3>
+    <p className="text-4xl font-bold mt-2">{count}</p>
+  </div>
+);
 
 export default Dashboard;

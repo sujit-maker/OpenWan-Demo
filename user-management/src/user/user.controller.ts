@@ -54,17 +54,18 @@ async getCustomerByUserId(@Param('id') id: string): Promise<Customer> {
 }
 
 @Get('managerSites/:id')
-async getSitesByManagerId(@Param('id') id: string): Promise<Site[]> {
+async getSiteByManagerId(@Param('id') id: string): Promise<Site[]> {
   const managerId = parseInt(id, 10);
 
   // Validate managerId
   if (isNaN(managerId)) {
-    throw new Error('Invalid manager ID');
+    throw new Error('Invalid Manager ID');
   }
 
-  // Call the service to fetch sites for the manager
+  // Call the service to fetch the site for the manager
   return this.userService.getSitesByManagerId(managerId);
 }
+
 
 
 
@@ -94,17 +95,15 @@ async getDevicesByManagerId(@Param('id') id: string): Promise<Site[]> {
   return this.userService.getDevicesByManagerId(managerId);
 }
 
-@Get('devicesByAdmin/:id')
-async getDevicesByAdminId(@Param('id') id: string): Promise<Device[]> {
-  const adminId = parseInt(id, 10);
+@Get('devicesByCustomer/:id')
+async getDevicesByCustomerId(@Param('id') id: string): Promise<Device[]> {
+  const userId = parseInt(id, 10);
 
-  // Validate adminId
-  if (isNaN(adminId)) {
-    throw new Error('Invalid admin ID');
+  if (isNaN(userId)) {
+    throw new BadRequestException('Invalid User ID');
   }
 
-  // Call the service to fetch devices associated with the admin
-  return this.userService.getDevicesByAdmin(adminId);
+  return this.userService.getDevicesByCustomerId(userId);
 }
 
 

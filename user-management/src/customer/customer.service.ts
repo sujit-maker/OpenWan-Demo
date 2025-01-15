@@ -47,6 +47,17 @@ export class CustomerService {
       throw new BadRequestException('Failed to fetch customer count');
     }
   }
+
+   // Count all customers
+   async countAllCustomers() {
+    try {
+      const count = await this.prisma.customer.count();
+      return { count };
+    } catch (error) {
+      console.error('Error fetching customer count:', error);
+      throw new BadRequestException('Failed to fetch customer count');
+    }
+  }
   
 
   async create(data: CreateCustomerDto) {

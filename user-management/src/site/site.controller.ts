@@ -18,6 +18,11 @@ export class SiteController {
   }
 
 
+  @Get('count')
+  async getAllSiteCount() {
+    return this.siteService.countAllSites();
+  }
+
   @Get()
   async findAll(@Query('adminId') adminId?: string, @Query('managerId') managerId?: string) {
     try {

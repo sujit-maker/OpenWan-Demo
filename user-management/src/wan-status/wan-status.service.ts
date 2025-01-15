@@ -28,8 +28,6 @@ export class WanStatusService {
         orderBy: { createdAt: 'desc' },
       });
 
-    
-
       // Check if the status has changed
       if (!previousStatus || previousStatus.status !== data.status) {
         const formattedSince = new Date(data.since).toLocaleString('en-GB', {
@@ -81,7 +79,6 @@ export class WanStatusService {
                 </div>
               `,
             });
-
           } else {
             console.warn(
               `No valid email addresses found for identity "${data.identity}".`,
@@ -90,10 +87,6 @@ export class WanStatusService {
         } else {
           console.warn(`No device found for identity "${data.identity}".`);
         }
-      } else {
-        console.log(
-          `Status for identity "${data.identity}" and comment "${data.comment}" has not changed. No email sent.`,
-        );
       }
     } catch (error) {
       console.error('Error in saveData:', error);

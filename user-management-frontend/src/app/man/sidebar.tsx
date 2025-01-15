@@ -265,7 +265,7 @@ const Sidebar: React.FC = () => {
                   >
                     <Package className="h-6 w-6 text-green-600" />
                     {isSidebarOpen && (
-                      <span className="text-lg">Customers</span>
+                      <span className="text-lg">Company</span>
                     )}
                   </button>
 
@@ -286,7 +286,7 @@ const Sidebar: React.FC = () => {
                     }`}
                   >
                     <DeviceUnknown className="h-6 w-6 text-pink-600" />
-                    {isSidebarOpen && <span className="text-lg">Device</span>}
+                    {isSidebarOpen && <span className="text-lg">Gateway</span>}
                   </button>
                 </>
               )}

@@ -26,7 +26,6 @@ const DeviceTable: React.FC = () => {
   const [dropdownVisible, setDropdownVisible] = useState<number | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const [connectLoading, setConnectLoading] = useState<boolean>(false); 
-
   const { currentUserType, userId, managerId, adminId } = useAuth();
   const router = useRouter();
 
@@ -46,7 +45,7 @@ const DeviceTable: React.FC = () => {
     try {
       let url = "";
       if (currentUserType === "ADMIN" && adminId) {
-        url = `http://localhost:8000/devices?adminId=${adminId}`;
+        url = `http://localhost:8000/users/devicesByCustomer/${adminId}`;
       } else if (currentUserType === "MANAGER" && managerId) {
         url = `http://localhost:8000/devices/user/${managerId}`;
       } else if (currentUserType === "SUPERADMIN") {

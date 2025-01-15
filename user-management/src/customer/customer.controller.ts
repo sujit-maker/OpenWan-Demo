@@ -48,7 +48,11 @@ export class CustomerController {
       throw new BadRequestException('Failed to fetch customers');
     }
   }
-
+  
+  @Get('count')
+  async getAllCustomerCount() {
+    return this.customerService.countAllCustomers();
+  }
 
   @Get('manager')
   async countByManagerId(@Query('managerId') managerId: string) {

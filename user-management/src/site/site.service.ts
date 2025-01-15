@@ -104,6 +104,18 @@ export class SiteService {
       throw new BadRequestException('Failed to fetch sites for the specified customer');
     }
   }
+
+   // Count all sites
+   async countAllSites() {
+    try {
+      const count = await this.prisma.site.count();
+      return { count };
+    } catch (error) {
+      console.error('Error fetching site count:', error);
+      throw new BadRequestException('Failed to fetch site count');
+    }
+  }
+  
   
 
   // Create a new Site
