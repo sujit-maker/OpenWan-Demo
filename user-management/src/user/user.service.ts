@@ -196,57 +196,89 @@ export class UserService {
     adminId?: number,
   ) {
     const { username, password, usertype, customerId, siteId, emailId } = createUserDto;
-
+  
     // Check if username already exists
     const userExists = await this.prisma.user.findUnique({
       where: { username },
     });
-
+  
     if (userExists) {
       throw new BadRequestException('Username already exists');
     }
-
+  
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Prepare user data
+  
+    // Prepare user data for User table
     const userData: any = {
       username,
       password: hashedPassword,
       usertype,
-      emailId,
       customerId,
       siteId,
     };
-
-    
-
-    // Connect the admin if the usertype is MANAGER and adminId is provided
-    if (usertype === UserType.MANAGER && adminId) {
-      userData.admin = { connect: { id: adminId } };
-    }
-
-    // Connect the manager for EXECUTIVE users (managerId is mandatory for EXECUTIVE)
-    if (usertype === UserType.EXECUTIVE) {
-      if (!managerId) {
-        throw new BadRequestException(
-          'managerId is required for EXECUTIVE user type',
-        );
-      }
-      userData.manager = { connect: { id: managerId } };
-
-      // Optionally connect admin if provided
-      if (adminId) {
-        userData.admin = { connect: { id: adminId } };
-      }
-    }
-
-    // Create user
+  
+    // Insert user into the User table
     const user = await this.prisma.user.create({
       data: userData,
     });
+  
+    // Update devices based on usertype
+    if (usertype === 'ADMIN' && customerId) {
+      // Fetch all sites associated with the customerId
+      const sites = await this.prisma.site.findMany({
+        where: { customerId },
+        select: { id: true },
+      });
+  
+      const siteIds = sites.map((site) => site.id);
+  
+      // Loop through all devices that belong to the fetched siteIds
+      for (const siteId of siteIds) {
+        const device = await this.prisma.device.findFirst({
+          where: { siteId },
+        });
+  
+        if (device) {
+          // Ensure device.emailId is always an array
+          const currentEmails = Array.isArray(device.emailId) ? device.emailId : [];
+  
+          // Add the new email to the existing emailId array
+          const updatedEmails = [...new Set([...currentEmails, emailId])]; // Prevent duplicates
+  
+          await this.prisma.device.update({
+            where: { deviceId: device.deviceId }, // Use deviceId (unique) for the update
+            data: {
+              emailId: updatedEmails, // Store the updated list of emails
+            },
+          });
+        }
+      }
+    } else if (usertype === 'MANAGER' && siteId) {
+      // Get the device linked to the manager's siteId
+      const device = await this.prisma.device.findFirst({
+        where: { siteId },
+      });
+  
+      if (device) {
+        // Ensure device.emailId is always an array
+        const currentEmails = Array.isArray(device.emailId) ? device.emailId : [];
+  
+        // Add the new email to the existing emailId array
+        const updatedEmails = [...new Set([...currentEmails, emailId])]; // Prevent duplicates
+  
+        await this.prisma.device.update({
+          where: { deviceId: device.deviceId }, // Use deviceId (unique) for the update
+          data: {
+            emailId: updatedEmails, // Store the updated list of emails
+          },
+        });
+      }
+    }
+  
     return user;
   }
+  
 
   async findAll() {
     return this.prisma.user.findMany({
@@ -256,7 +288,6 @@ export class UserService {
         usertype: true,
         emailId: true,
         managerId: true,
-
         adminId: true,
         deviceId: true,
       },
