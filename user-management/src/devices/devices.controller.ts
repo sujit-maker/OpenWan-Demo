@@ -81,29 +81,26 @@ async getDevices(@Param('userId') userId: string) {
     return this.mikrotikService.fetchAllData(routerUrl, auth);
   }
 
-  @Post('test/data')
-  async testDevice(@Body() body: { username: string; password: string; port: string; ip: string }) {
-    const { username, password, port, ip } = body;
-  
+  @Post('count/device')
+  async testDevice(@Body() body: { username: string; password: string; ip: string; port: string }) {
+    const { username, password, ip, port } = body;
+
     // Validate the input
-    if (!username || !password || !port || !ip) {
+    if (!username || !password || !ip || !port) {
       throw new BadRequestException('Missing required fields: username, password, ip, or port');
     }
-  
-    // Build the router URL
-    const routerUrl = `http://${ip}:${port}`;
-    const auth = { username, password };
-  
+
     try {
-      // Call the testData method to fetch data from the MikroTik router
-      const data = await this.mikrotikService.testData(); // Ensure this method is called with 2 arguments
-      return data; // Return the merged data from the MikroTik router
+      // Call the countDevice method with the necessary arguments
+      const data = await this.mikrotikService.countDevice(username, password, ip, port);
+      
+      // Return the data with online, offline, and partial device counts
+      return data;
     } catch (error) {
       // Handle errors and send a response
       throw new BadRequestException('Failed to fetch data from the device');
     }
   }
-  
   
 
 

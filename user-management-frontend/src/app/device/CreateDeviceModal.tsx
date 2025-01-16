@@ -26,7 +26,6 @@ const CreateDeviceModal: React.FC<CreateDeviceModalProps> = ({
   const [deviceIp, setDeviceIp] = useState("");
   const [devicePort, setDevicePort] = useState("");
   const [portCount, setPortCount] = useState("");
-  const [emailId, setEmailId] = useState<string[]>([]); // Array for multiple emails
   const [deviceUsername, setDeviceUsername] = useState("");
   const [devicePassword, setDevicePassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -36,14 +35,10 @@ const CreateDeviceModal: React.FC<CreateDeviceModalProps> = ({
   const [siteId, setSiteId] = useState<number | null>(null);
 
   const { currentUserType } = useAuth();
-  const [managers, setManagers] = useState<User[]>([]);
-  const [admins, setAdmins] = useState<User[]>([]);
-  const [selectedAdminId, setSelectedAdminId] = useState<string>(""); // Starts empty
-  const [managerId, setManagerId] = useState(""); // Store manager ID
+    const [managerId, setManagerId] = useState(""); // Store manager ID
   const [adminId, setAdminId] = useState("");
 
   const loggedInAdminId = localStorage.getItem("adminId");
-  const loggedInManagerId = localStorage.getItem("managerId"); // Fetch managerId from localStorage if user is a manager
   const userType = typeof window !== "undefined" ? localStorage.getItem("userType") : null;
 
   // Automatically set adminId for ADMIN users and fetch managers
@@ -112,26 +107,7 @@ const CreateDeviceModal: React.FC<CreateDeviceModalProps> = ({
 
  
 
-   // Function to handle adding a new email input
-   const addEmailInput = () => {
-    setEmailId([...emailId, ""]);
-  };
-
-  // Function to handle removing an email input
-  const removeEmailInput = (index: number) => {
-    const updatedEmails = emailId.filter((_, i) => i !== index);
-    setEmailId(updatedEmails);
-  };
-
-  // Function to handle updating the email input value
-  const handleEmailChange = (index: number, value: string) => {
-    const updatedEmails = [...emailId];
-    updatedEmails[index] = value;
-    setEmailId(updatedEmails);
-  };
-
   
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -143,7 +119,6 @@ const CreateDeviceModal: React.FC<CreateDeviceModalProps> = ({
       deviceIp,
       devicePort,
       portCount,
-      emailId,
       deviceUsername,
       devicePassword,
     };
@@ -185,7 +160,6 @@ const CreateDeviceModal: React.FC<CreateDeviceModalProps> = ({
     setDeviceIp("");
     setDevicePort("");
     setPortCount("");
-    setEmailId([]);
     setDeviceUsername("");
     setDevicePassword("");
   };
@@ -335,37 +309,6 @@ const CreateDeviceModal: React.FC<CreateDeviceModalProps> = ({
           />
         </div>
 
-        {/* Email Inputs */}
-        <div className="mb-4 text-black">
-      <h2 className="text-lg text-white font-medium mb-4">Email IDs</h2>
-      {emailId.map((email, index) => (
-        <div key={index} className="flex items-center mb-2">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => handleEmailChange(index, e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder={`Email ${index + 1}`}
-          />
-          {emailId.length > 1 && (
-            <button
-              type="button"
-              onClick={() => removeEmailInput(index)}
-              className="ml-2 text-black bold hover:text-white"
-            >
-              ━
-            </button>
-          )}
-        </div>
-      ))}
-      <button
-        type="button"
-        onClick={addEmailInput}
-        className="px-3 py-1 2xl text-white rounded-lg hover:bg-slate-800"
-      >
-        ✚
-      </button>
-    </div>
 
 
         {/* Device Username */}

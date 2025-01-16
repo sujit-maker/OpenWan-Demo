@@ -10,7 +10,9 @@ const Dashboard: React.FC = () => {
   const [deviceCount, setDeviceCount] = useState<number | null>(null);
   const [onlineDevice, setOnlineDevice] = useState<number | null>(null);
   const [offlineDevice, setOfflineDevice] = useState<number | null>(null);
+  const [partialDevice, setPartialDevice] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const body = {
     username: "admin",
@@ -19,41 +21,41 @@ const Dashboard: React.FC = () => {
     port: "91",
   };
 
-  // Fetch data for online and offline devices
+  // Fetch all data in one request or separate requests (keep separate if API requires)
   useEffect(() => {
+    setLoading(true);  // Set loading state to true before making API calls
+
+    // Fetch data for online, offline, and partial devices
     axios
-      .post(`http://localhost:8000/devices/test/data`, body)
+      .post(`http://localhost:8000/devices/count/device`, body)
       .then((response) => {
-        // Update online and offline device counts
         setOnlineDevice(response.data.onlineDevices);
         setOfflineDevice(response.data.offlineDevices);
+        setPartialDevice(response.data.partialDevices);
       })
       .catch((error) => {
         console.error("Error fetching device data:", error);
         setError("Failed to fetch device data.");
       });
-  }, []);
 
-  // Fetch other data (customer count, site count, etc.)
-  useEffect(() => {
+    // Fetch customer count
     axios
       .get(`http://localhost:8000/customers/count`)
-      .then((response) => setCustomerCount(response.data.count))
+      .then((response) => setCustomerCount(response.data?.count || 0))
       .catch((error) => console.error("Error fetching customer count:", error));
-  }, []);
 
-  useEffect(() => {
+    // Fetch site count
     axios
       .get(`http://localhost:8000/site/count`)
-      .then((response) => setSiteCount(response.data.count))
+      .then((response) => setSiteCount(response.data?.count || 0))
       .catch((error) => console.error("Error fetching site count:", error));
-  }, []);
 
-  useEffect(() => {
+    // Fetch device count
     axios
       .get(`http://localhost:8000/devices/count`)
-      .then((response) => setDeviceCount(response.data.count))
-      .catch((error) => console.error("Error fetching device count:", error));
+      .then((response) => setDeviceCount(response.data?.count || 0))
+      .catch((error) => console.error("Error fetching device count:", error))
+      .finally(() => setLoading(false));  // Set loading to false after all API calls
   }, []);
 
   return (
@@ -70,43 +72,54 @@ const Dashboard: React.FC = () => {
             <div className="text-red-500 text-center mb-4">{error}</div>
           )}
 
-          <div className="flex flex-wrap  justify-center gap-6">
-            {customerCount !== null && (
-              <Card
-                title="Customers Count"
-                count={customerCount}
-                gradient="bg-yellow-600"
-              />
-            )}
-            {siteCount !== null && (
-              <Card
-                title="Sites Count"
-                count={siteCount}
-                gradient="bg-yellow-600"
-              />
-            )}
-            {deviceCount !== null && (
-              <Card
-                title="Devices Count"
-                count={deviceCount}
-                gradient="bg-yellow-600"
-              />
-            )}
-            {onlineDevice !== null && (
-              <Card
-                title="Online Devices"
-                count={onlineDevice}
-                gradient="bg-green-600 "
-              />
-            )}
-            {offlineDevice !== null && (
-              <Card
-                title="Offline Devices"
-                count={offlineDevice}
-                gradient="bg-red-600"
-              />
-            )}
-          </div>
+          {loading ? (
+            <div className="text-center text-gray-500">Loading...</div>
+          ) : (
+            <div className="flex flex-wrap justify-center gap-6">
+              {customerCount !== null && (
+                <Card
+                  title="Company Count"
+                  count={customerCount}
+                  gradient="bg-pink-900"
+                />
+              )}
+              {siteCount !== null && (
+                <Card
+                  title="Sites Count"
+                  count={siteCount}
+                  gradient="bg-pink-900"
+                />
+              )}
+              {deviceCount !== null && (
+                <Card
+                  title="Devices Count"
+                  count={deviceCount}
+                  gradient="bg-pink-900"
+                />
+              )}
+              {onlineDevice !== null && (
+                <Card
+                  title="Online Devices"
+                  count={onlineDevice}
+                  gradient="bg-green-600 "
+                />
+              )}
+              {partialDevice !== null && (
+                <Card
+                  title="Partial Devices"
+                  count={partialDevice}
+                  gradient="bg-blue-800 "
+                />
+              )}
+              {offlineDevice !== null && (
+                <Card
+                  title="Offline Devices"
+                  count={offlineDevice}
+                  gradient="bg-red-600"
+                />
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

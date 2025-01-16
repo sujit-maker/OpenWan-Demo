@@ -156,40 +156,7 @@ export class DevicesService {
     return this.mikrotikService.fetchEndpointData(routerUrl, auth, endpoint);
   }
 
- // In MikroTikService
-async testData(routerUrl: string, auth: { username: string; password: string }) {
-  const endpoints = ['system/resource']; // Add any other endpoints here
-
-  try {
-    // Create the authorization header from the username and password
-    const authHeader = this.createAuthHeader(auth);
-
-    // Make requests to all specified endpoints
-    const requests = endpoints.map((endpoint) =>
-      axios.get(`${routerUrl}/rest/${endpoint}`, {
-        headers: { Authorization: authHeader },
-      }),
-    );
-
-    // Wait for all requests to resolve and merge the data
-    const responses = await Promise.all(requests);
-
-    // Merge data from each endpoint into one object
-    const mergedData = Object.fromEntries(
-      responses.map((response, index) => [endpoints[index], response.data]),
-    );
-
-    return mergedData;
-  } catch (error) {
-    console.error('Error fetching all data:', error);
-    throw new Error(`Failed to fetch data from endpoints: ${error.message}`);
-  }
-}
-
-// Helper method to create the authorization header for MikroTik login
-private createAuthHeader(auth: { username: string; password: string }) {
-  return `Basic ${Buffer.from(`${auth.username}:${auth.password}`).toString('base64')}`;
-}
+ 
 
   
 

@@ -68,12 +68,9 @@ export class MikroTikService {
   }
 
  // Method to fetch active PPP users and match them with devices in the database
- async testData() {
-  const { username, password, ip, port } = this.defaultConfig;
-
+ async countDevice(username: string, password: string, ip: string, port: string) {
   const routerUrl = `http://${ip}:${port}`;
   const auth = { username, password };
-
   const endpoints = ['ppp/active'];
 
   try {
@@ -93,22 +90,67 @@ export class MikroTikService {
     // Create a set of active device names (ppp/active names)
     const activeDeviceNames = new Set(activeData.map((user) => user.name));
 
-    // Count the online and offline devices
+    // Count the online, offline, and partial devices
     let onlineCount = 0;
     let offlineCount = 0;
+    let partialCount = 0;
 
-    devices.forEach((device) => {
+    // Iterate over each device in the database
+    for (const device of devices) {
       if (activeDeviceNames.has(device.deviceId)) {
-        onlineCount += 1; // Device is online
+        // Device is online, check the MikroTik status
+        const mikrotikDevice = await this.prisma.mikroTik.findMany({
+          where: { identity: device.deviceName }, // Assuming deviceName is the correct field
+        });
+
+        if (mikrotikDevice.length > 0) {
+          let isPartial = false;
+
+          // Create a map to hold the latest status of each comment (WAN)
+          const latestStatusByComment: { [key: string]: { status: string, createdAt: Date } } = {};
+
+          // Iterate through each MikroTik status and find the latest status per comment
+          for (const deviceStatus of mikrotikDevice) {
+            const { comment, status, createdAt } = deviceStatus;
+
+            // Parse createdAt to a Date object for comparison
+            const createdAtDate = new Date(createdAt);
+
+            // If there's no status for this comment or the current entry is more recent, update it
+            if (
+              !latestStatusByComment[comment] ||
+              createdAtDate > latestStatusByComment[comment].createdAt
+            ) {
+              latestStatusByComment[comment] = { status, createdAt: createdAtDate };
+            }
+          }
+
+          // Check the most recent status of each WAN (WAN1, WAN2, etc.)
+          for (const comment of ['WAN1', 'WAN2', 'WAN3', 'WAN4']) {
+            if (latestStatusByComment[comment]?.status === 'down') {
+              isPartial = true; // If any WAN is down, mark as partial
+              break;
+            }
+          }
+
+          if (isPartial) {
+            partialCount += 1; // Increment partial count if any WAN is down
+          } else {
+            onlineCount += 1; // Device is fully online if no WAN is down
+          }
+        } else {
+          offlineCount += 1; // Device is online but no MikroTik record found (fallback)
+        }
       } else {
         offlineCount += 1; // Device is offline
       }
-    });
+    }
 
-    // Return the count of online and offline devices
+    // Return the count of online, offline, and partial devices
     return {
       onlineDevices: onlineCount,
       offlineDevices: offlineCount,
+      partialDevices: partialCount,
     };
   } catch (error) {
     console.error('Error fetching active devices:', error);
@@ -118,6 +160,8 @@ export class MikroTikService {
     );
   }
 }
+
+
 
   // Method to fetch data from a specific endpoint
   async fetchEndpointData(routerUrl: string, auth: { username: string; password: string }, endpoint: string) {
