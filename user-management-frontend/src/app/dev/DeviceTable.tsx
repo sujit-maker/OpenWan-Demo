@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 
-const DeviceTable: React.FC = () => {
+const DevTable: React.FC = () => {
   const [devices, setDevices] = useState<Device[]>([]);
   const [filteredDevices, setFilteredDevices] = useState<Device[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -330,4 +330,4 @@ const DeviceTable: React.FC = () => {
   );
 };
 
-export default DeviceTable;
+export default DevTable;

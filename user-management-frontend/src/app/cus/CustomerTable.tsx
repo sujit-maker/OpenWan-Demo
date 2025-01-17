@@ -191,7 +191,7 @@ const CusTable: React.FC = () => {
             onClick={() => setIsCreateModalOpen(true)}
             className="bg-gradient-to-r bg-indigo-800 text-white px-6 py-3 rounded-lg shadow-lg hover:from-indigo-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-95 w-full sm:w-auto mb-4 sm:mb-0"
           >
-            Add Customer
+            Add Company
           </button>
           <div className="relative w-full sm:w-auto">
             <input

@@ -39,9 +39,9 @@ const DeviceTable: React.FC = () => {
       setError("User not authenticated");
       return;
     }
-
+  
     setLoading(true);
-
+  
     try {
       let url = "";
       if (currentUserType === "ADMIN" && adminId) {
@@ -51,24 +51,28 @@ const DeviceTable: React.FC = () => {
       } else if (currentUserType === "SUPERADMIN") {
         url = "http://localhost:8000/devices";
       }
-
+  
       if (!url) {
         throw new Error("Invalid user type or missing user ID");
       }
-
+  
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error("Failed to fetch devices");
       }
-
-      const data: Device[] = await response.json();
-      setDevices(data);
+  
+      const data = await response.json();
+  
+      // Extract the devices array from the response and set it in state
+      setDevices(data.devices); // Assuming 'devices' is an array inside the response
+  
     } catch (error) {
       setError(error instanceof Error ? error.message : "Unknown error");
     } finally {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     fetchSites(); 
@@ -81,15 +85,18 @@ const DeviceTable: React.FC = () => {
   }, [currentUserType, userId, adminId, managerId]);
 
   useEffect(() => {
-    setFilteredDevices(
-      devices.filter(
-        (device) =>
-          device.deviceName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          device.deviceId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          device.deviceType.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    );
+    if (Array.isArray(devices)) {
+      setFilteredDevices(
+        devices.filter(
+          (device) =>
+            device.deviceName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            device.deviceId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            device.deviceType.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      );
+    }
   }, [searchQuery, devices]);
+  
 
   const fetchSites = async () => {
     try {

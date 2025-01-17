@@ -1,3 +1,4 @@
+"use client"
 import React, { useEffect, useState } from 'react';
 import { Device, Site } from './types';
 
@@ -37,23 +38,20 @@ const EditDeviceModal: React.FC<EditDeviceModalProps> = ({
     setUpdatedDevice((prev) => ({ ...prev, [field]: value }));
   };
 
-
-  if (!updatedDevice.deviceName || !updatedDevice.deviceIp) {
-    setError('Device Name and Device IP are required');
-    return;
-  }
-  
- 
   const handleSave = async () => {
-    // Initialize an object for updated fields
-    const updatedFields: any = {};
-  
-    // Handle emailId separately (since it needs to be an array)
-    if (updatedDevice.emailId && typeof updatedDevice.emailId === 'string' && updatedDevice.emailId.trim() !== '') {
-      updatedFields.emailId = [updatedDevice.emailId.trim()]; // Ensure emailId is an array
+    if (!updatedDevice.deviceName || !updatedDevice.deviceIp) {
+      setError('Device Name and Device IP are required');
+      return;
     }
-  
-    // For other fields, only include them if they're updated
+
+    setError(null); // Clear any existing errors before attempting to save
+
+    const updatedFields: any = {};
+
+    if (updatedDevice.emailId && typeof updatedDevice.emailId === 'string' && updatedDevice.emailId.trim() !== '') {
+      updatedFields.emailId = [updatedDevice.emailId.trim()];
+    }
+
     if (updatedDevice.deviceId) updatedFields.deviceId = updatedDevice.deviceId;
     if (updatedDevice.deviceName) updatedFields.deviceName = updatedDevice.deviceName;
     if (updatedDevice.deviceType) updatedFields.deviceType = updatedDevice.deviceType;
@@ -63,31 +61,28 @@ const EditDeviceModal: React.FC<EditDeviceModalProps> = ({
     if (updatedDevice.deviceUsername) updatedFields.deviceUsername = updatedDevice.deviceUsername;
     if (updatedDevice.devicePassword) updatedFields.devicePassword = updatedDevice.devicePassword;
     if (updatedDevice.siteId) updatedFields.siteId = updatedDevice.siteId;
-  
+
     try {
-      // Construct the PUT request with only the updated fields
       const response = await fetch(`http://localhost:8000/devices/${updatedDevice.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedFields), // Send only the updated fields
+        body: JSON.stringify(updatedFields),
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("Error response:", errorData);
+        console.error('Error response:', errorData);
         throw new Error(`Error: ${errorData.message || 'Failed to update device'}`);
       }
-  
-      // Handle the successful update
+
       const updatedDeviceData = await response.json();
-      onDeviceUpdated(updatedDeviceData); // Pass the updated device data to the parent
-      alert("Device Updated successfully!");
-      closeModal(); // Close the modal
+      onDeviceUpdated(updatedDeviceData);
+      alert('Device Updated successfully!');
+      closeModal();
     } catch (error) {
-      console.error('Failed to update device:', error); // Log any errors
+      console.error('Failed to update device:', error);
     }
   };
-  
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 transition-all duration-500 ease-in-out">
@@ -97,7 +92,7 @@ const EditDeviceModal: React.FC<EditDeviceModalProps> = ({
         {/* Error message */}
         {error && <div className="text-red-500 text-sm mb-4">{error}</div>}
 
-        <div className="mb-4" style={{ marginTop: "-20px" }}>
+        <div className="mb-4">
           <label className="block text-sm font-medium text-gray-200 mb-2">Device ID</label>
           <input
             type="text"

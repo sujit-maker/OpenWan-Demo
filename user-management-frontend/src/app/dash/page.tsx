@@ -1,62 +1,102 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
-import Sidebar from "../components/Sidebar";
+import Sidebar from "../man/sidebar";
 import axios from "axios";
+import { useAuth } from "../hooks/useAuth";
+
+interface CardProps {
+  title: string;
+  count: number | null;
+  gradient: string;
+}
+
+const Card: React.FC<CardProps> = ({ title, count, gradient }) => (
+  <div
+    className={`w-full sm:w-[300px] bg-gradient-to-r ${gradient} rounded-lg shadow-xl transform transition duration-500 hover:scale-105 hover:shadow-2xl p-6 flex flex-col items-center justify-center text-white`}
+  >
+    <h3 className="text-lg font-semibold text-center">{title}</h3>
+    <p className="text-4xl font-bold mt-2">{count !== null ? count : "N/A"}</p>
+  </div>
+);
 
 const Dashboard: React.FC = () => {
   const [customerCount, setCustomerCount] = useState<number | null>(null);
   const [siteCount, setSiteCount] = useState<number | null>(null);
   const [deviceCount, setDeviceCount] = useState<number | null>(null);
+  const [userDeviceCount, setUserDeviceCount] = useState<number | null>(null);
   const [onlineDevice, setOnlineDevice] = useState<number | null>(null);
   const [offlineDevice, setOfflineDevice] = useState<number | null>(null);
   const [partialDevice, setPartialDevice] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const body = {
+  const { currentUserType, userId, managerId } = useAuth();
+
+  const deviceBody = {
     username: "admin",
     password: "Enpl@253000",
     ip: "opw1.openwan.in",
     port: "91",
   };
 
-  // Fetch all data in one request or separate requests (keep separate if API requires)
   useEffect(() => {
-    setLoading(true);  // Set loading state to true before making API calls
+    const fetchCounts = async () => {
+      setLoading(true);
+      setError(null);
 
-    // Fetch data for online, offline, and partial devices
-    axios
-      .post(`http://localhost:8000/devices/count/device`, body)
-      .then((response) => {
-        setOnlineDevice(response.data.onlineDevices);
-        setOfflineDevice(response.data.offlineDevices);
-        setPartialDevice(response.data.partialDevices);
-      })
-      .catch((error) => {
-        console.error("Error fetching device data:", error);
-        setError("Failed to fetch device data.");
-      });
+      try {
+        // Fetch device status counts
+        const deviceResponse = await axios.post(
+          `http://localhost:8000/devices/count/device`,
+          deviceBody
+        );
+        console.log("Device count response:", deviceResponse.data);
+        setOnlineDevice(deviceResponse.data.onlineDevices);
+        setOfflineDevice(deviceResponse.data.offlineDevices);
+        setPartialDevice(deviceResponse.data.partialDevices);
 
-    // Fetch customer count
-    axios
-      .get(`http://localhost:8000/customers/count`)
-      .then((response) => setCustomerCount(response.data?.count || 0))
-      .catch((error) => console.error("Error fetching customer count:", error));
+        // Fetch customer count based on userId
+        if (userId) {
+          const customerResponse = await axios.get(
+            `http://localhost:8000/users/countCustomers?userIds=${userId}`
+          );
+          console.log("Customer count response:", customerResponse.data);
+          setCustomerCount(customerResponse.data?.count || customerResponse.data);
+        }
 
-    // Fetch site count
-    axios
-      .get(`http://localhost:8000/site/count`)
-      .then((response) => setSiteCount(response.data?.count || 0))
-      .catch((error) => console.error("Error fetching site count:", error));
+        // Fetch site count based on managerId or userId
+        if (currentUserType === "MANAGER" && managerId) {
+          const siteResponse = await axios.get(
+            `http://localhost:8000/users/managerSitesCount/${managerId}`
+          );
+          console.log("Manager site count response:", siteResponse.data);
+          setSiteCount(siteResponse.data?.count || siteResponse.data);
+        } else if (currentUserType === "MANAGER" && userId) {
+          const siteResponse = await axios.get(
+            `http://localhost:8000/users/sitesByUserCount/${userId}`
+          );
+          console.log("User site count response:", siteResponse.data);
+          setSiteCount(siteResponse.data?.count || siteResponse.data);
+        }
 
-    // Fetch device count
-    axios
-      .get(`http://localhost:8000/devices/count`)
-      .then((response) => setDeviceCount(response.data?.count || 0))
-      .catch((error) => console.error("Error fetching device count:", error))
-      .finally(() => setLoading(false));  // Set loading to false after all API calls
-  }, []);
+        // Fetch user-specific device count based on userId
+        if (userId) {
+          const userDeviceResponse = await axios.get(
+            `http://localhost:8000/devices/user/${userId}`
+          );
+          console.log("User device count response:", userDeviceResponse.data);
+          setUserDeviceCount(userDeviceResponse.data?.count || userDeviceResponse.data);
+        }
+      } catch (err) {
+        console.error("Error fetching dashboard data:", err);
+        setError("Failed to fetch dashboard data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCounts();
+  }, [userId, managerId, currentUserType]);
 
   return (
     <div className="flex h-screen">
@@ -68,56 +108,18 @@ const Dashboard: React.FC = () => {
             Dashboard
           </h1>
 
-          {error && (
-            <div className="text-red-500 text-center mb-4">{error}</div>
-          )}
+          {error && <div className="text-red-500 text-center mb-4">{error}</div>}
 
           {loading ? (
             <div className="text-center text-gray-500">Loading...</div>
           ) : (
             <div className="flex flex-wrap justify-center gap-6">
-              {customerCount !== null && (
-                <Card
-                  title="Company Count"
-                  count={customerCount}
-                  gradient="bg-pink-900"
-                />
-              )}
-              {siteCount !== null && (
-                <Card
-                  title="Sites Count"
-                  count={siteCount}
-                  gradient="bg-pink-900"
-                />
-              )}
-              {deviceCount !== null && (
-                <Card
-                  title="Devices Count"
-                  count={deviceCount}
-                  gradient="bg-pink-900"
-                />
-              )}
-              {onlineDevice !== null && (
-                <Card
-                  title="Online Devices"
-                  count={onlineDevice}
-                  gradient="bg-green-600 "
-                />
-              )}
-              {partialDevice !== null && (
-                <Card
-                  title="Partial Devices"
-                  count={partialDevice}
-                  gradient="bg-blue-800 "
-                />
-              )}
-              {offlineDevice !== null && (
-                <Card
-                  title="Offline Devices"
-                  count={offlineDevice}
-                  gradient="bg-red-600"
-                />
-              )}
+              <Card title="Company Count" count={customerCount} gradient="bg-pink-900" />
+              <Card title="Sites Count" count={siteCount} gradient="bg-pink-900" />
+              <Card title="Devices Count" count={userDeviceCount} gradient="bg-purple-600" />
+              <Card title="Online Devices" count={onlineDevice} gradient="bg-green-600" />
+              <Card title="Partial Devices" count={partialDevice} gradient="bg-blue-800" />
+              <Card title="Offline Devices" count={offlineDevice} gradient="bg-red-600" />
             </div>
           )}
         </div>
@@ -125,20 +127,5 @@ const Dashboard: React.FC = () => {
     </div>
   );
 };
-
-interface CardProps {
-  title: string;
-  count: number;
-  gradient: string;
-}
-
-const Card: React.FC<CardProps> = ({ title, count, gradient }) => (
-  <div
-    className={`w-full sm:w-[300px] bg-gradient-to-r ${gradient} rounded-lg shadow-xl transform transition duration-500 hover:scale-105 hover:shadow-2xl p-6 flex flex-col items-center justify-center text-white`}
-  >
-    <h3 className="text-lg font-semibold text-center">{title}</h3>
-    <p className="text-4xl font-bold mt-2">{count}</p>
-  </div>
-);
 
 export default Dashboard;

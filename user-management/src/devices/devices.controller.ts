@@ -13,10 +13,15 @@ import { MikroTikService } from 'src/mikrotik/mikrotik.service';
   ) {}
 
   @Get('user/:userId')
-async getDevices(@Param('userId') userId: string) {
-  const userIdNumber = parseInt(userId, 10);  // Convert string to number
-  return await this.devicesService.getDevicesForUser(userIdNumber);
-}
+  async getDevices(@Param('userId') userId: string) {
+    const userIdNumber = parseInt(userId, 10); // Convert string to number
+    const devices = await this.devicesService.getDevicesForUser(userIdNumber);
+    return {
+      count: devices.length, // Return the count of devices
+      devices,              // Return the devices array (optional)
+    };
+  }
+  
 
 
   @Post()
@@ -124,8 +129,8 @@ async findBySiteId(@Param('siteId') siteId: string) {
   }
 
   @Get(':deviceId/wan-ip')
-  async getWanIp(@Param('deviceId') deviceId: string, @Query('wan') wan: 'WAN1' | 'WAN2') {
-    if (!['WAN1', 'WAN2'].includes(wan)) {
+  async getWanIp(@Param('deviceId') deviceId: string, @Query('wan') wan: 'WAN1' | 'WAN2' | 'WAN3' | 'WAN4') {
+    if (!['WAN1', 'WAN2','WAN3','WAN4'].includes(wan)) {
       throw new NotFoundException(`Invalid WAN type: ${wan}`);
     }
 
@@ -165,14 +170,6 @@ async findBySiteId(@Param('siteId') siteId: string) {
     return this.devicesService.getNetwatchData(deviceId); 
   }
 
-  
-
-
-  // Endpoint to get the device category based on WAN status
-  @Get('status/:deviceId')
-  async getDeviceStatus(@Param('deviceId') deviceId: string): Promise<string> {
-    return this.devicesService.categorizeDeviceByWanStatus(deviceId);
-  }
 
 
   @Put(':id')

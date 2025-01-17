@@ -11,10 +11,6 @@ interface CreateSiteModalProps {
   fetchSites: () => void;
 }
 
-interface User {
-  id: string;
-  username: string;
-}
 
 const CreateSiteModal: React.FC<CreateSiteModalProps> = ({
   isOpen,
@@ -30,8 +26,6 @@ const CreateSiteModal: React.FC<CreateSiteModalProps> = ({
   const [contactEmail, setContactEmail] = useState("");
   const [customerId, setCustomerId] = useState<number | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
-  const [managers, setManagers] = useState<User[]>([]);
-  const [admins, setAdmins] = useState<User[]>([]);
   const [selectedAdminId, setSelectedAdminId] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

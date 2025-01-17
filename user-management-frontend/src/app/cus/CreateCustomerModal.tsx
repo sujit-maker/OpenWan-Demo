@@ -185,7 +185,7 @@ const CreateCustomerModal: React.FC<CreateCustomerModalProps> = ({
       {/* Customer details */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-white mb-1">
-          Customer Name
+          Company Name
         </label>
         <input
           type="text"

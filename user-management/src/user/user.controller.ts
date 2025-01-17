@@ -13,6 +13,8 @@ import {
   HttpException,
   HttpStatus,
   NotFoundException,
+  Put,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -20,7 +22,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { User } from './user.decorator';
-import { UserType } from './user-type.enum';
 import { Customer, Device, Site } from '@prisma/client';
 
 export interface User {
@@ -53,6 +54,23 @@ async getCustomerByUserId(@Param('id') id: string): Promise<Customer> {
   return this.userService.getCustomerByUserId(userId);
 }
 
+// Route to count customers for multiple userIds
+@Get('countCustomers')
+async countCustomers(
+  @Query('userIds') userIds: string, // Accepts a query parameter like ?userIds=1,2,3
+): Promise<number> {
+  // Parse and validate userIds (comma-separated string)
+  const ids = userIds.split(',').map(id => parseInt(id, 10));
+
+  if (ids.some(id => isNaN(id))) {
+    throw new Error('Invalid user IDs');
+  }
+
+  // Call the service to count customers for the provided userIds
+  return this.userService.countCustomersByUserIds(ids);
+}
+
+
 @Get('managerSites/:id')
 async getSiteByManagerId(@Param('id') id: string): Promise<Site[]> {
   const managerId = parseInt(id, 10);
@@ -81,6 +99,25 @@ async getSitesByAdminId(@Param('id') id: string): Promise<Site[]> {
   // Fetch the sites based on adminId
   return this.userService.getSitesByAdmin(adminId);
 }
+
+
+ // Route to get the count of sites by managerId
+ @Get('managerSitesCount/:id')
+ async countSitesByManagerId(
+   @Param('id', ParseIntPipe) id: number,  // Automatically parses and validates the id
+ ): Promise<number> {
+   // Call the service to fetch the site count for the manager
+   return this.userService.countSitesByManagerId(id);
+ }
+
+ // Route to get the count of sites by adminId
+ @Get('sitesByAdminCount/:id')
+ async countSitesByAdminId(
+   @Param('id', ParseIntPipe) id: number,  // Automatically parses and validates the id
+ ): Promise<number> {
+   // Call the service to fetch the site count for the admin
+   return this.userService.countSitesByAdmin(id);
+ }
 
 @Get('managerDevices/:id')
 async getDevicesByManagerId(@Param('id') id: string): Promise<Site[]> {
@@ -237,7 +274,7 @@ async getDevicesByCustomerId(@Param('id') id: string): Promise<Device[]> {
   
 
  
-  @Patch(':id')
+  @Put(':id')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     try {
       return await this.userService.update(Number(id), updateUserDto);
@@ -257,7 +294,7 @@ async getDevicesByCustomerId(@Param('id') id: string): Promise<Device[]> {
     }
   }
 
-  @Patch(':id/change-password')
+  @Put(':id/change-password')
   async changePassword(
     @Param('id') id: string,
     @Body() changePasswordDto: ChangePasswordDto,

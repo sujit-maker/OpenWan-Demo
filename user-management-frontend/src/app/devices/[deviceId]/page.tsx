@@ -54,23 +54,47 @@ const DeviceDetails: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const entriesPerPage = 6;
 
+  // Fetch WAN logs
   const fetchWanLogs = useCallback(async () => {
     try {
-      const response = await fetch(`http://localhost:8000/wanstatus`);
-      if (!response.ok) throw new Error("Failed to fetch WAN logs");
+      console.log("Fetching WAN logs...");
+      if (!deviceId) {
+        console.error("Device ID is missing!");
+        return;
+      }
+
+      const response = await fetch(`http://localhost:8000/wanstatus/${deviceId}`);
+      console.log("WAN log response status: ", response.status); // Log status
+      if (!response.ok) throw new Error(`Failed to fetch WAN logs, Status: ${response.status}`);
+
       const data = await response.json();
-      setWanLogs(data.data);
-      setShowLogs(true);
+      console.log("WAN logs fetched:", data); // Log the entire response
+
+      // Check the data structure directly here
+      if (Array.isArray(data)) {
+        console.log("WAN logs are in array format.");
+        setWanLogs(data);  // Set WAN logs correctly
+        setShowLogs(true);
+      } else {
+        console.warn("WAN logs data is missing or not an array.");
+        setWanLogs([]);  // Ensure an empty array if the logs are missing
+        setShowLogs(false);
+      }
     } catch (error) {
       console.error("Error fetching WAN logs:", error);
     }
-  }, []);
+  }, [deviceId]);
 
   useEffect(() => {
     fetchWanLogs();
     const interval = setInterval(fetchWanLogs, 5000);
 
     return () => clearInterval(interval);
+  }, [fetchWanLogs]);
+
+  useEffect(() => {
+    fetchWanLogs();
+
   }, [fetchWanLogs]);
 
   const indexOfLastEntry = currentPage * entriesPerPage;
@@ -244,6 +268,7 @@ const DeviceDetails: React.FC = () => {
       </div>
     );
   }
+  console.log("Current WAN logs:", wanLogs);
 
   return (
     <>
@@ -253,9 +278,9 @@ const DeviceDetails: React.FC = () => {
         style={{
           ...(window.innerWidth < 640
             ? {
-                marginTop: "20px",
-                textAlign: "center",
-              }
+              marginTop: "20px",
+              textAlign: "center",
+            }
             : {}),
         }}
       >
@@ -307,11 +332,10 @@ const DeviceDetails: React.FC = () => {
           {/* WAN 1 */}
           {portCount >= 1 && (
             <div
-              className={`${
-                deviceData.wan1.internet.toLowerCase() === "up"
+              className={`${deviceData.wan1.internet.toLowerCase() === "up"
                   ? "bg-green-400"
                   : "bg-red-400"
-              } rounded-lg shadow-2xl p-4 border w-full transform transition duration-300 hover:scale-105 hover:shadow-xl max-w-sm`}
+                } rounded-lg shadow-2xl p-4 border w-full transform transition duration-300 hover:scale-105 hover:shadow-xl max-w-sm`}
             >
               <h2 className="text-lg font-semibold mb-2">WAN 1</h2>
               <p className="text-gray-900">IP : {deviceData.wan1.address}</p>
@@ -323,11 +347,10 @@ const DeviceDetails: React.FC = () => {
           {/* WAN 2 */}
           {portCount >= 2 && (
             <div
-              className={`bg-${
-                deviceData.wan2.internet.toLowerCase() === "up"
+              className={`bg-${deviceData.wan2.internet.toLowerCase() === "up"
                   ? "green"
                   : "red"
-              }-400 rounded-lg  shadow-2xl p-4 border w-full transform transition duration-300 hover:scale-105 hover:shadow-xl max-w-sm`}
+                }-400 rounded-lg  shadow-2xl p-4 border w-full transform transition duration-300 hover:scale-105 hover:shadow-xl max-w-sm`}
             >
               <h2 className="text-lg font-semibold mb-2">WAN 2</h2>
               <p className="text-gray-900">IP : {deviceData.wan2.address}</p>
@@ -339,11 +362,10 @@ const DeviceDetails: React.FC = () => {
           {/* WAN 3 */}
           {portCount >= 3 && (
             <div
-              className={`bg-${
-                deviceData.wan3.internet.toLowerCase() === "up"
+              className={`bg-${deviceData.wan3.internet.toLowerCase() === "up"
                   ? "green"
                   : "red"
-              }-400 rounded-lg bg-red-500 shadow-2xl p-4 border w-full transform transition duration-300 hover:scale-105 hover:shadow-xl max-w-sm`}
+                }-400 rounded-lg bg-red-500 shadow-2xl p-4 border w-full transform transition duration-300 hover:scale-105 hover:shadow-xl max-w-sm`}
             >
               <h2 className="text-lg font-semibold mb-2">WAN 3</h2>
               <p className="text-gray-900">
@@ -357,11 +379,10 @@ const DeviceDetails: React.FC = () => {
           {/* WAN 4 */}
           {portCount >= 4 && (
             <div
-              className={`bg-${
-                deviceData.wan4.internet.toLowerCase() === "up"
+              className={`bg-${deviceData.wan4.internet.toLowerCase() === "up"
                   ? "green"
                   : "red"
-              }-400 rounded-lg bg-red-500  shadow-2xl p-4 border w-full transform transition duration-300 hover:scale-105 hover:shadow-xl max-w-sm`}
+                }-400 rounded-lg bg-red-500  shadow-2xl p-4 border w-full transform transition duration-300 hover:scale-105 hover:shadow-xl max-w-sm`}
             >
               <h2 className="text-lg font-semibold mb-2">WAN 4</h2>
               <p className="text-gray-900">
@@ -410,33 +431,37 @@ const DeviceDetails: React.FC = () => {
                       </th>
                     </tr>
                   </thead>
+
                   <tbody>
                     {currentLogs.map((log) => (
                       <tr key={log.id}>
                         <td className="border p-2 text-center text-xs md:text-base">
-                          {log.createdAt}
+                          {log?.createdAt ?? "N/A"}
                         </td>
                         <td className="border p-2 text-center text-xs md:text-base">
-                          {log.identity}
+                          {log?.identity ?? "N/A"}
                         </td>
                         <td className="border p-2 text-center text-xs md:text-base">
-                          {log.comment}
+                          {log?.comment ?? "N/A"}
                         </td>
                         <td className="border p-2 text-center text-xs md:text-base">
-                          {log.status}
+                          {log?.status ?? "N/A"}
                         </td>
                         <td className="border p-2 text-center text-xs md:text-base">
-                          {log.since}
+                          {log?.since ?? "N/A"}
                         </td>
                       </tr>
                     ))}
                   </tbody>
+
+
+
                 </table>
               </div>
             )}
           </div>
         )}
-        
+
         {/* Pagination Controls */}
         <div className="flex justify-center mt-4  space-x-6">
           <button

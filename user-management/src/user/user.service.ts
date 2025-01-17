@@ -38,6 +38,27 @@ export class UserService {
     return user.customer;
   }
 
+
+  // Count how many customers are fetched in a list of users (optional method)
+  async countCustomersByUserIds(adminIds: number[]): Promise<number> {
+    const users = await this.prisma.user.findMany({
+      where: {
+        id: { in: adminIds },
+      },
+      include: {
+        customer: true, // Include customers to count
+      },
+    });
+
+    // Return the count of customers for these users
+    const customerCount = users.filter(user => user.customer).length;
+
+    console.log(`Fetched ${customerCount} customer(s) for the provided userIds`);
+
+    return customerCount;
+  }
+
+
   async getSitesByManagerId(managerId: number): Promise<Site[]> {
     // Fetch the manager's details, including their siteId
     const manager = await this.prisma.user.findUnique({
@@ -91,6 +112,53 @@ export class UserService {
 
     return sites;
   }
+
+  // UserService
+
+async countSitesByManagerId(managerId: number): Promise<number> {
+  // Fetch the manager's details, including their siteId
+  const manager = await this.prisma.user.findUnique({
+    where: { id: managerId },
+    select: { siteId: true, usertype: true }, // Select only the necessary fields
+  });
+
+  if (!manager || manager.usertype !== 'MANAGER' || !manager.siteId) {
+    throw new Error('Invalid Manager ID or no associated site ID');
+  }
+
+  // Fetch the site that matches the manager's siteId
+  const siteCount = await this.prisma.site.count({
+    where: { id: manager.siteId },
+  });
+
+  // Return the count of sites
+  return siteCount;
+}
+
+async countSitesByAdmin(adminId: number): Promise<number> {
+  // Step 1: Fetch the customerId associated with the given adminId
+  const adminUser = await this.prisma.user.findUnique({
+    where: { id: adminId },
+    select: {
+      customerId: true,
+    },
+  });
+
+  // Check if adminUser exists and has a customerId
+  if (!adminUser || !adminUser.customerId) {
+    throw new Error('Admin user not found or does not have an associated customerId');
+  }
+
+  const customerId = adminUser.customerId;
+
+  // Step 2: Count the number of sites associated with the retrieved customerId
+  const siteCount = await this.prisma.site.count({
+    where: { customerId },
+  });
+
+  // Return the count of sites
+  return siteCount;
+}
 
 
   async getDevicesByManagerId(managerId: number): Promise<Site[]> {

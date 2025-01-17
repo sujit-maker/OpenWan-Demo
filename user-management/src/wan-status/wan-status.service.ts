@@ -94,6 +94,9 @@ export class WanStatusService {
     }
   }
 
+
+  
+
   // Helper function to parse email IDs from JSON or array
   private parseEmailIds(emailId: any): string[] {
     try {
@@ -116,26 +119,30 @@ export class WanStatusService {
     }
   }
 
-  // Function to retrieve logs
-  async getLogs(): Promise<any[]> {
-    try {
-      const logs = await this.prisma.mikroTik.findMany();
 
-      const formattedLogs = logs.map((log) => {
-        const formattedCreatedAt = format(
-          new Date(log.createdAt),
-          'dd/MM/yyyy , HH:mm:ss',
-        );
-        return {
-          ...log,
-          createdAt: formattedCreatedAt,
-        };
-      });
+   // Fetch logs based on the deviceId (identity)
+async getLogsByDeviceId(deviceId: string): Promise<any[]> {
+  try {
+    // Fetch logs from the database where identity matches the deviceId
+    const logs = await this.prisma.mikroTik.findMany({
+      where: {
+        identity: deviceId, // Filter logs using identity matching the deviceId
+      },
+      orderBy: {
+        createdAt: 'desc', // Order logs by creation time (most recent first)
+      },
+    });
 
-      return formattedLogs;
-    } catch (error) {
-      console.error('Error fetching logs:', error);
-      throw error;
-    }
-  }
+    // Map and format the logs in the same way as getLogs function
+    const formattedLogs = logs.map((log) => ({
+      ...log,
+      createdAt: format(new Date(log.createdAt), 'dd/MM/yyyy , HH:mm:ss'), // Format the createdAt date field
+    }));
+
+    return formattedLogs;
+  } catch (error) {
+    // Log the error and rethrow it
+    console.error('Error fetching logs by deviceId:', error);
+    throw new Error('Unable to fetch logs for the specified device. Please try again.');
+  }}
 }

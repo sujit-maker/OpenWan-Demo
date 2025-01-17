@@ -8,11 +8,6 @@ interface CreateDeviceModalProps {
   isOpen: boolean;
   onClose: () => void;
   onDeviceCreated: () => void;
-} 
-
-interface User {
-  id: string;
-  username: string;
 }
 
 const CreateDeviceModal: React.FC<CreateDeviceModalProps> = ({
@@ -20,7 +15,7 @@ const CreateDeviceModal: React.FC<CreateDeviceModalProps> = ({
   onClose,
   onDeviceCreated,
 }) => {
-  const [deviceId,setDeviceId] = useState("");
+  const [deviceId, setDeviceId] = useState("");
   const [deviceName, setDeviceName] = useState("");
   const [deviceType, setDeviceType] = useState("");
   const [deviceIp, setDeviceIp] = useState("");
@@ -35,7 +30,7 @@ const CreateDeviceModal: React.FC<CreateDeviceModalProps> = ({
   const [siteId, setSiteId] = useState<number | null>(null);
 
   const { currentUserType } = useAuth();
-    const [managerId, setManagerId] = useState(""); // Store manager ID
+  const [managerId, setManagerId] = useState(""); // Store manager ID
   const [adminId, setAdminId] = useState("");
 
   const loggedInAdminId = localStorage.getItem("adminId");
@@ -63,12 +58,12 @@ const CreateDeviceModal: React.FC<CreateDeviceModalProps> = ({
     }
   }, [currentUserType]); // Runs when the currentUserType changes
 
-  
+
 
   const fetchSites = async () => {
     try {
       let url = "";
-      
+
       // Check if userType is ADMIN and adminId is available
       if (userType === "ADMIN" && adminId) {
         url = `http://localhost:8000/users/sitesByAdmin/${adminId}`;
@@ -81,7 +76,7 @@ const CreateDeviceModal: React.FC<CreateDeviceModalProps> = ({
       else if (userType === "SUPERADMIN") {
         url = `http://localhost:8000/site`;
       }
-  
+
       // If url is built, fetch data
       if (url) {
         const response = await fetch(url);
@@ -102,12 +97,12 @@ const CreateDeviceModal: React.FC<CreateDeviceModalProps> = ({
   useEffect(() => {
     fetchSites(); // Fetch customer names based on user type and ID
   }, [userType, adminId, managerId]); // Dependency array ensures fetch happens when these values change
-  
-  
 
- 
 
-  
+
+
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -166,200 +161,200 @@ const CreateDeviceModal: React.FC<CreateDeviceModalProps> = ({
 
   return (
     <Transition show={isOpen} as={React.Fragment}>
-    <Dialog
-      as="div"
-      onClose={onClose}
-      className="fixed inset-0 flex items-center justify-center p-4 bg-black bg-opacity-50 z-[9999] backdrop-blur-md"
-      aria-labelledby="create-user-title"
-      aria-describedby="create-user-description"
-    >
-    <Dialog.Panel className="max-w-sm w-full max-h-[90vh] bg-gradient-to-r from-blue-500 via-indigo-600 to-purple-600 p-6 rounded-lg shadow-xl overflow-y-auto transform transition-transform duration-300 hover:scale-105">
-      <Dialog.Title
-        id="create-device-title"
-        className="text-2xl font-semibold text-white mb-4 text-center"
+      <Dialog
+        as="div"
+        onClose={onClose}
+        className="fixed inset-0 flex items-center justify-center p-4 bg-black bg-opacity-50 z-[9999] backdrop-blur-md"
+        aria-labelledby="create-user-title"
+        aria-describedby="create-user-description"
       >
-        Add New Device
-      </Dialog.Title>
+        <Dialog.Panel className="max-w-sm w-full max-h-[90vh] bg-gradient-to-r from-blue-500 via-indigo-600 to-purple-600 p-6 rounded-lg shadow-xl overflow-y-auto transform transition-transform duration-300 hover:scale-105">
+          <Dialog.Title
+            id="create-device-title"
+            className="text-2xl font-semibold text-white mb-4 text-center"
+          >
+            Add New Device
+          </Dialog.Title>
 
-      {/* Error and Success Alerts */}
-      {error && (
-        <div
-          className="bg-red-100 text-red-700 p-3 rounded-lg mb-4 shadow-md"
-          role="alert"
-        >
-          {error}
-        </div>
-      )}
-      {success && (
-        <div
-          className="bg-green-100 text-green-700 p-3 rounded-lg mb-4 shadow-md"
-          role="alert"
-        >
-          {success}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit}>
-
-      <div className="mb-4">
-          <label htmlFor="deviceName" className="block text-white text-sm font-medium">
-            Device Identity
-          </label>
-          <input
-            id="deviceId"
-            type="text"
-            value={deviceId}
-            onChange={(e) => setDeviceId(e.target.value)}
-            required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-          />
-        </div>
-
-        {/* Device Name Input */}
-        <div className="mb-4">
-          <label htmlFor="deviceName" className="block text-white text-sm font-medium">
-            Device Name
-          </label>
-          <input
-            id="deviceName"
-            type="text"
-            value={deviceName}
-            onChange={(e) => setDeviceName(e.target.value)}
-            required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-          />
-        </div>
-
-                 <div className="mb-4">
-            <label className="block text-white text-sm font-medium mb-1">
-              Select Site
-            </label>
-            <select
-              value={siteId || ""}
-              onChange={(e) => setSiteId(Number(e.target.value))}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          {/* Error and Success Alerts */}
+          {error && (
+            <div
+              className="bg-red-100 text-red-700 p-3 rounded-lg mb-4 shadow-md"
+              role="alert"
             >
-              <option value="">Select Site</option>
-              {sites.map((site) => (
-                <option key={site.id} value={site.id}>
-                  {site.siteName}
-                </option>
-              ))}
-            </select>
-          </div>
-     
+              {error}
+            </div>
+          )}
+          {success && (
+            <div
+              className="bg-green-100 text-green-700 p-3 rounded-lg mb-4 shadow-md"
+              role="alert"
+            >
+              {success}
+            </div>
+          )}
 
-        {/* Other Fields */}
-        <div className="mb-4">
-          <label htmlFor="deviceType" className="block text-white text-sm font-medium">
-            Device Type
-          </label>
-          <input
-            id="deviceType"
-            type="text"
-            value={deviceType}
-            onChange={(e) => setDeviceType(e.target.value)}
-            required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+          <form onSubmit={handleSubmit}>
 
-        {/* Device IP */}
-        <div className="mb-4">
-          <label htmlFor="deviceIp" className="block text-white text-sm font-medium">
-            Device IP
-          </label>
-          <input
-            id="deviceIp"
-            type="text"
-            value={deviceIp}
-            onChange={(e) => setDeviceIp(e.target.value)}
-            required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+            <div className="mb-4">
+              <label htmlFor="deviceName" className="block text-white text-sm font-medium">
+                Device Identity
+              </label>
+              <input
+                id="deviceId"
+                type="text"
+                value={deviceId}
+                onChange={(e) => setDeviceId(e.target.value)}
+                required
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              />
+            </div>
 
-        {/* Device Port */}
-        <div className="mb-4">
-          <label htmlFor="devicePort" className="block text-white text-sm font-medium">
-            Device Port
-          </label>
-          <input
-            id="devicePort"
-            type="text"
-            value={devicePort}
-            onChange={(e) => setDevicePort(e.target.value)}
-            required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+            {/* Device Name Input */}
+            <div className="mb-4">
+              <label htmlFor="deviceName" className="block text-white text-sm font-medium">
+                Device Name
+              </label>
+              <input
+                id="deviceName"
+                type="text"
+                value={deviceName}
+                onChange={(e) => setDeviceName(e.target.value)}
+                required
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              />
+            </div>
 
-        {/* Number Of WAN */}
-        <div className="mb-4">
-          <label htmlFor="portCount" className="block text-white text-sm font-medium">
-            Number Of WAN
-          </label>
-          <input
-            id="portCount"
-            type="text"
-            value={portCount}
-            onChange={(e) => setPortCount(e.target.value)}
-            required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+            <div className="mb-4">
+              <label className="block text-white text-sm font-medium mb-1">
+                Select Site
+              </label>
+              <select
+                value={siteId || ""}
+                onChange={(e) => setSiteId(Number(e.target.value))}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Select Site</option>
+                {sites.map((site) => (
+                  <option key={site.id} value={site.id}>
+                    {site.siteName}
+                  </option>
+                ))}
+              </select>
+            </div>
 
 
+            {/* Other Fields */}
+            <div className="mb-4">
+              <label htmlFor="deviceType" className="block text-white text-sm font-medium">
+                Device Type
+              </label>
+              <input
+                id="deviceType"
+                type="text"
+                value={deviceType}
+                onChange={(e) => setDeviceType(e.target.value)}
+                required
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
 
-        {/* Device Username */}
-        <div className="mb-4">
-          <label htmlFor="deviceUsername" className="block text-white text-sm font-medium">
-            Device Username
-          </label>
-          <input
-            id="deviceUsername"
-            type="text"
-            value={deviceUsername}
-            onChange={(e) => setDeviceUsername(e.target.value)}
-            required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+            {/* Device IP */}
+            <div className="mb-4">
+              <label htmlFor="deviceIp" className="block text-white text-sm font-medium">
+                Device IP
+              </label>
+              <input
+                id="deviceIp"
+                type="text"
+                value={deviceIp}
+                onChange={(e) => setDeviceIp(e.target.value)}
+                required
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
 
-        {/* Device Password */}
-        <div className="mb-4">
-          <label htmlFor="devicePassword" className="block text-white text-sm font-medium">
-            Device Password
-          </label>
-          <input
-            id="devicePassword"
-            type="text"
-            value={devicePassword}
-            onChange={(e) => setDevicePassword(e.target.value)}
-            required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+            {/* Device Port */}
+            <div className="mb-4">
+              <label htmlFor="devicePort" className="block text-white text-sm font-medium">
+                Device Port
+              </label>
+              <input
+                id="devicePort"
+                type="text"
+                value={devicePort}
+                onChange={(e) => setDevicePort(e.target.value)}
+                required
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
 
-        <div className="flex justify-between mt-6">
-        <button
-          onClick={onClose}
-          className="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg transition-all duration-200 hover:bg-gray-400"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={handleSubmit}
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg transition-all duration-200 hover:bg-blue-700"
-        >
-          Save Device
-        </button>
-      </div>
+            {/* Number Of WAN */}
+            <div className="mb-4">
+              <label htmlFor="portCount" className="block text-white text-sm font-medium">
+                Number Of WAN
+              </label>
+              <input
+                id="portCount"
+                type="text"
+                value={portCount}
+                onChange={(e) => setPortCount(e.target.value)}
+                required
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
 
-      </form>
-    </Dialog.Panel>
-  </Dialog>
-</Transition>
+
+
+            {/* Device Username */}
+            <div className="mb-4">
+              <label htmlFor="deviceUsername" className="block text-white text-sm font-medium">
+                Device Username
+              </label>
+              <input
+                id="deviceUsername"
+                type="text"
+                value={deviceUsername}
+                onChange={(e) => setDeviceUsername(e.target.value)}
+                required
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Device Password */}
+            <div className="mb-4">
+              <label htmlFor="devicePassword" className="block text-white text-sm font-medium">
+                Device Password
+              </label>
+              <input
+                id="devicePassword"
+                type="text"
+                value={devicePassword}
+                onChange={(e) => setDevicePassword(e.target.value)}
+                required
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="flex justify-between mt-6">
+              <button
+                onClick={onClose}
+                className="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg transition-all duration-200 hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmit}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg transition-all duration-200 hover:bg-blue-700"
+              >
+                Save Device
+              </button>
+            </div>
+
+          </form>
+        </Dialog.Panel>
+      </Dialog>
+    </Transition>
 
   );
 };

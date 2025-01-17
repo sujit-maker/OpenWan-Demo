@@ -1,8 +1,8 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import axios from "axios";
+import { useAuth } from "../hooks/useAuth";
 
 const Dashboard: React.FC = () => {
   const [customerCount, setCustomerCount] = useState<number | null>(null);
@@ -14,49 +14,92 @@ const Dashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const body = {
+  const { currentUserType, userId, managerId, adminId } = useAuth();
+
+  const deviceBody = {
     username: "admin",
     password: "Enpl@253000",
     ip: "opw1.openwan.in",
     port: "91",
   };
 
-  // Fetch all data in one request or separate requests (keep separate if API requires)
   useEffect(() => {
-    setLoading(true);  // Set loading state to true before making API calls
+    const fetchCounts = async () => {
+      try {
+        setLoading(true); // Start loading
 
-    // Fetch data for online, offline, and partial devices
-    axios
-      .post(`http://localhost:8000/devices/count/device`, body)
-      .then((response) => {
-        setOnlineDevice(response.data.onlineDevices);
-        setOfflineDevice(response.data.offlineDevices);
-        setPartialDevice(response.data.partialDevices);
-      })
-      .catch((error) => {
-        console.error("Error fetching device data:", error);
-        setError("Failed to fetch device data.");
-      });
+        // 1. Fetch Online, Offline, Partial Device Counts
+        const deviceResponse = await axios.post(
+          `http://localhost:8000/devices/count/device`,
+          deviceBody
+        );
+        console.log("Device count response:", deviceResponse.data);
+        setOnlineDevice(deviceResponse.data.onlineDevices);
+        setOfflineDevice(deviceResponse.data.offlineDevices);
+        setPartialDevice(deviceResponse.data.partialDevices);
 
-    // Fetch customer count
-    axios
-      .get(`http://localhost:8000/customers/count`)
-      .then((response) => setCustomerCount(response.data?.count || 0))
-      .catch((error) => console.error("Error fetching customer count:", error));
+        // 2. Handle SUPERADMIN specific fetch
+        if (currentUserType === "SUPERADMIN") {
+          const customerResponse = await axios.get(
+            `http://localhost:8000/customers/count`
+          );
+          console.log("Customer count response for SUPERADMIN:", customerResponse.data);
+          setCustomerCount(customerResponse.data?.count || customerResponse.data);
 
-    // Fetch site count
-    axios
-      .get(`http://localhost:8000/site/count`)
-      .then((response) => setSiteCount(response.data?.count || 0))
-      .catch((error) => console.error("Error fetching site count:", error));
+          const siteResponse = await axios.get(
+            `http://localhost:8000/site/count`
+          );
+          console.log("Site count response for SUPERADMIN:", siteResponse.data);
+          setSiteCount(siteResponse.data?.count || siteResponse.data);
 
-    // Fetch device count
-    axios
-      .get(`http://localhost:8000/devices/count`)
-      .then((response) => setDeviceCount(response.data?.count || 0))
-      .catch((error) => console.error("Error fetching device count:", error))
-      .finally(() => setLoading(false));  // Set loading to false after all API calls
-  }, []);
+          const totalDeviceResponse = await axios.get(
+            `http://localhost:8000/devices/count`
+          );
+          console.log("Total device count response for SUPERADMIN:", totalDeviceResponse.data);
+          setDeviceCount(totalDeviceResponse.data?.count || totalDeviceResponse.data);
+        } else {
+          // 3. Fetch Customer Count (if userId exists) for non-SUPERADMIN
+          if (userId) {
+            console.log("Fetching customer count with userId:", userId);
+            const customerResponse = await axios.get(
+              `http://localhost:8000/users/countCustomers?userIds=${userId}`
+            );
+            console.log("Customer count response:", customerResponse.data);
+            setCustomerCount(customerResponse.data?.count || customerResponse.data);
+          }
+
+          // 4. Fetch Site Count (based on UserType)
+          if (currentUserType === "ADMIN" && adminId) {
+            const siteResponse = await axios.get(
+              `http://localhost:8000/users/sitesByAdminCount/${adminId}`
+            );
+            console.log("Admin site count response:", siteResponse.data);
+            setSiteCount(siteResponse.data?.count || siteResponse.data);
+          } else if (currentUserType === "MANAGER" && managerId) {
+            const siteResponse = await axios.get(
+              `http://localhost:8000/users/managerSitesCount/${managerId}`
+            );
+            console.log("Manager site count response:", siteResponse.data);
+            setSiteCount(siteResponse.data?.count || siteResponse.data);
+          }
+
+          // 5. Fetch Total Device Count for non-SUPERADMIN
+          const totalDeviceResponse = await axios.get(
+            `http://localhost:8000/devices/count`
+          );
+          console.log("Total device count response:", totalDeviceResponse.data);
+          setDeviceCount(totalDeviceResponse.data?.count || totalDeviceResponse.data);
+        }
+      } catch (err) {
+        console.error("Error fetching counts:", err);
+        setError("Failed to fetch dashboard data.");
+      } finally {
+        setLoading(false); // End loading
+      }
+    };
+
+    fetchCounts();
+  }, [userId, managerId, adminId, currentUserType]); // Re-fetch if these dependencies change
 
   return (
     <div className="flex h-screen">

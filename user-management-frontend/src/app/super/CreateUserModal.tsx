@@ -133,13 +133,15 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
 
   return (
     <Transition show={isOpen} as={React.Fragment}>
-      <Dialog
-        as="div"
-        onClose={onClose}
-        className="fixed inset-0 flex items-center justify-center p-4 bg-black bg-opacity-50 z-[9999]"
-      >
-        <Dialog.Panel className="max-w-sm w-full bg-white p-6 rounded-lg shadow-xl">
-          <Dialog.Title className="text-xl font-semibold mb-4 text-center">
+       <Dialog
+         as="div"
+         onClose={onClose}
+         className="fixed inset-0 flex items-center justify-center p-4 bg-black bg-opacity-50 z-[9999] backdrop-blur-md"
+         aria-labelledby="create-user-title"
+         aria-describedby="create-user-description"
+       >
+       <Dialog.Panel className="max-w-sm w-full max-h-[90vh] bg-gradient-to-r from-blue-500 via-indigo-600 to-purple-600 p-6 rounded-lg shadow-xl overflow-y-auto transform transition-transform duration-300 hover:scale-105">
+          <Dialog.Title className="text-xl font-semibold mb-4 text-white text-center">
             Create User
           </Dialog.Title>
 
@@ -148,7 +150,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
 
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Username</label>
+              <label className="block text-sm text-white font-medium mb-1">Username</label>
               <input
                 type="text"
                 value={username}
@@ -159,7 +161,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Password</label>
+              <label className="block text-sm text-white font-medium mb-1">Password</label>
               <input
                 type="password"
                 value={password}
@@ -170,7 +172,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Email Id</label>
+              <label className="block text-sm text-white font-medium mb-1">Email Id</label>
               <input
                 type="text"
                 value={emailId}
@@ -181,7 +183,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">User Type</label>
+              <label className="block text-sm text-white font-medium mb-1">User Type</label>
               <select
                 value={usertype}
                 onChange={(e) => {
@@ -200,7 +202,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
 
             {/* Always show customer dropdown */}
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Customer</label>
+              <label className="block text-sm text-white font-medium mb-1">Customer</label>
               <select
                 value={selectedCustomerId || ""}
                 onChange={(e) => setSelectedCustomerId(Number(e.target.value))}

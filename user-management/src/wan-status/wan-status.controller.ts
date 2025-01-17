@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, Param, Post } from '@nestjs/common';
 import { WanStatusService } from './wan-status.service';
 
 @Controller('wanstatus')
@@ -27,17 +27,12 @@ export class WanStatusController {
     }
   }
 
-  // Endpoint to get logs
-  @Get()
-  async getAllLogs(): Promise<any> {
-    try {
-      const logs = await this.wanStatusService.getLogs();
-      return { message: 'Logs retrieved successfully', data: logs };
-    } catch (error) {
-      throw new HttpException(
-        `Failed to retrieve logs: ${error.message}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
+
+
+   // Endpoint to fetch logs based on the deviceId (identity in MikroTik)
+   @Get(':deviceId')
+   async getLogs(@Param('deviceId') deviceId: string) {
+     return this.wanStatusService.getLogsByDeviceId(deviceId);
+   }
+
 }

@@ -20,29 +20,28 @@ export class DevicesService {
   ) {}
 
   async getDevicesForUser(userId: number) {
-    const userIdNumber = parseInt(userId.toString(), 10);
-
+    // Fetch the user and their associated siteId
     const user = await this.prisma.user.findUnique({
-      where: {
-        id: userIdNumber,
-      },
-      select: {
-        siteId: true,
-      },
+      where: { id: userId },
+      select: { siteId: true }, // Fetch only siteId to minimize data load
     });
-
+  
     if (!user) {
       throw new Error('User not found');
     }
-
+  
+    if (!user.siteId) {
+      throw new Error(`User with ID ${userId} does not have an associated siteId`);
+    }
+  
+    // Fetch devices associated with the user's siteId
     const devices = await this.prisma.device.findMany({
-      where: {
-        siteId: user.siteId,
-      },
+      where: { siteId: user.siteId },
     });
-
+  
     return devices;
   }
+  
 
   async findByAdminId(adminId: number) {
     try {
@@ -218,44 +217,7 @@ export class DevicesService {
     return fetchFunction.call(this.mikrotikService, routerUrl, auth);
   }
 
-  async categorizeDeviceByWanStatus(deviceId: string): Promise<string> {
-    const device = await this.prisma.device.findUnique({
-      where: { deviceId },
-    });
-
-    if (!device) {
-      throw new NotFoundException(`Device with ID ${deviceId} not found`);
-    }
-
-    const wanStatuses = await Promise.all([
-      this.mikrotikService.fetchWan1Status(device.deviceIp, {
-        username: device.deviceUsername,
-        password: device.devicePassword,
-      }),
-      this.mikrotikService.fetchWan2Status(device.deviceIp, {
-        username: device.deviceUsername,
-        password: device.devicePassword,
-      }),
-      this.mikrotikService.fetchWan3Status(device.deviceIp, {
-        username: device.deviceUsername,
-        password: device.devicePassword,
-      }),
-      this.mikrotikService.fetchWan4Status(device.deviceIp, {
-        username: device.deviceUsername,
-        password: device.devicePassword,
-      }),
-    ]);
-
-    const activeWans = wanStatuses.filter((wan) => wan !== null).length;
-
-    if (activeWans === wanStatuses.length) {
-      return 'full working';
-    } else if (activeWans > 0) {
-      return 'partial working';
-    } else {
-      return 'no working';
-    }
-  }
+  
 
   async findAll(): Promise<Device[]> {
     return this.prisma.device.findMany();

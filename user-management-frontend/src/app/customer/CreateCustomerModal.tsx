@@ -171,13 +171,13 @@ const CreateCustomerModal: React.FC<CreateCustomerModalProps> = ({
     <Dialog.Panel className="max-w-sm w-full max-h-[90vh] bg-gradient-to-r from-blue-500 via-indigo-600 to-purple-600 p-6 rounded-lg shadow-xl overflow-y-auto transform transition-transform duration-300 hover:scale-105">
        
       <h2 className="text-2xl font-semibold text-white mb-4 text-center">
-        Add New Customer
+        Add New Company
       </h2>
   
       {/* Customer details */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-white mb-1">
-          Customer Name
+          Company Name
         </label>
         <input
           type="text"
