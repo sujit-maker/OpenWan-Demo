@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Sidebar from "../man/sidebar";
+import Sidebar from "../components/Sidebar";
 import axios from "axios";
 import { useAuth } from "../hooks/useAuth";
 
@@ -30,7 +30,7 @@ const Dashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const { currentUserType, userId, managerId } = useAuth();
+  const { currentUserType, userId, managerId, adminId } = useAuth();
 
   const deviceBody = {
     username: "admin",
@@ -39,11 +39,12 @@ const Dashboard: React.FC = () => {
     port: "91",
   };
 
+
   useEffect(() => {
     const fetchCounts = async () => {
       setLoading(true);
       setError(null);
-  
+
       try {
         // Fetch device status counts
         const deviceResponse = await axios.post(
@@ -51,17 +52,17 @@ const Dashboard: React.FC = () => {
           deviceBody
         );
         setPartialDevice(deviceResponse.data.partialDevices);
-  
-        // Fetch customer count based on userId
-        if (userId) {
+
+        // Fetch customer count
+        if (userId || currentUserType === "SUPERADMIN") {
           const customerResponse = await axios.get(
-            `http://localhost:8000/users/countCustomers?userIds=${userId}`
+            `http://localhost:8000/users/countCustomers?userIds=${userId || ""}`
           );
           setCustomerCount(customerResponse.data?.count || customerResponse.data);
         }
-  
-        // Fetch site count based on managerId or userId
-        if (currentUserType === "MANAGER" && managerId) {
+
+        // Fetch site count
+        if (currentUserType === "ADMIN" && adminId) {
           const siteResponse = await axios.get(
             `http://localhost:8000/users/managerSitesCount/${managerId}`
           );
@@ -72,70 +73,75 @@ const Dashboard: React.FC = () => {
           );
           setSiteCount(siteResponse.data?.count || siteResponse.data);
         }
-  
-        // Fetch user-specific device count
-        if (userId) {
-          const userDeviceResponse = await axios.get(
-            `http://localhost:8000/devices/user/${userId}`
-          );
-          const deviceIds = userDeviceResponse.data.devices.map(
+
+        // Fetch devices
+        let deviceEndpoint = "";
+        if (currentUserType === "SUPERADMIN") {
+          deviceEndpoint = `http://localhost:8000/devices/all`;
+        } else if (currentUserType === "ADMIN") {
+          deviceEndpoint = `http://localhost:8000/users/devicesByCustomer/${adminId}`;
+        } else if (userId) {
+          deviceEndpoint = `http://localhost:8000/devices/user/${userId}`;
+        }
+
+        if (deviceEndpoint) {
+          const userDeviceResponse = await axios.get(deviceEndpoint);
+
+          const deviceIds = userDeviceResponse.data.map(
             (device: { deviceId: string }) => device.deviceId
           );
           setUserDeviceCount(deviceIds.length);
-  
-          // Fetch online/offline status for the user's devices
+
+          // Fetch online/offline status for the devices
           const fetchResponse = await axios.post(
             `http://localhost:8000/devices/fetch`,
             deviceBody
           );
-  
-          const fetchedNames = fetchResponse.data['ppp/active'].map(
+
+          const fetchedNames = fetchResponse.data["ppp/active"].map(
             (item: { name: string }) => item.name
           );
-  
+
           let onlineCount = 0;
           let offlineCount = 0;
           let partialCount = 0;
-  
+
           // Fetch WAN status to determine partial or online devices
-          const wanStatusResponse = await axios.get('http://localhost:8000/wanstatus/all');
+          const wanStatusResponse = await axios.get("http://localhost:8000/wanstatus/all");
           const wanStatuses = wanStatusResponse.data; // WAN status data
-  
+
           deviceIds.forEach((deviceId: string) => {
-            // Check if the device is online by matching deviceId with identity in WAN status
             const matchingWanStatuses = wanStatuses.filter(
               (wan: { identity: string }) => wan.identity === deviceId
             );
-  
+
             if (matchingWanStatuses.length > 0) {
-              // Sort WAN statuses by createdAt to get the latest one
               const sortedStatuses = matchingWanStatuses.sort(
                 (a: { createdAt: string }, b: { createdAt: string }) =>
                   new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
               );
-  
-              // Now check the latest status of both WAN1 and WAN2
+
               let isOnline = true;
-  
               const latestWAN1 = sortedStatuses.find((wan: { comment: string }) => wan.comment === "WAN1");
               const latestWAN2 = sortedStatuses.find((wan: { comment: string }) => wan.comment === "WAN2");
-  
-              // If either WAN1 or WAN2 has 'down' status, it's partial
-              if ((latestWAN1 && latestWAN1.status === "down") || (latestWAN2 && latestWAN2.status === "down")) {
-                isOnline = false; // Partial if any WAN is down
+
+              if (
+                (latestWAN1 && latestWAN1.status === "down") ||
+                (latestWAN2 && latestWAN2.status === "down")
+              ) {
+                isOnline = false;
               }
-  
+
               if (isOnline) {
-                onlineCount++; // If all WANs are up, the device is online
+                onlineCount++;
               } else {
-                partialCount++; // If any WAN is down, the device is partial
+                partialCount++;
               }
             } else {
-              offlineCount++; // If no matching WAN status, the device is offline
+              offlineCount++;
             }
           });
-  
-          // Set counts
+
           setOnlineDevice(onlineCount);
           setOfflineDevice(offlineCount);
           setPartialDevice(partialCount);
@@ -147,14 +153,12 @@ const Dashboard: React.FC = () => {
         setLoading(false);
       }
     };
-  
+
     fetchCounts();
     const interval = setInterval(fetchCounts, 5000);
-  
+
     return () => clearInterval(interval);
-  }, [userId, managerId, currentUserType]);
-  
-  
+  }, [userId, managerId, adminId, currentUserType]);
 
   return (
     <div className="flex h-screen">

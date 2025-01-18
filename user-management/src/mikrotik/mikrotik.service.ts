@@ -7,13 +7,6 @@ export class MikroTikService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-
-  private readonly defaultConfig = {
-    username: 'admin',
-    password: 'Enpl@253000',
-    ip: 'opw1.openwan.in',
-    port: '91',
-  };
   
   private createAuthHeader(auth: { username: string; password: string }) {
     return `Basic ${Buffer.from(`${auth.username}:${auth.password}`).toString('base64')}`;
@@ -66,6 +59,33 @@ export class MikroTikService {
       );
     }
   }
+
+
+
+   // Method to fetch all data from specified endpoints
+   async fetchActiveData(routerUrl: string, auth: { username: string; password: string }) {
+    const endpoints = ['ppp/active'];
+
+    try {
+      const authHeader = this.createAuthHeader(auth);
+      const requests = endpoints.map(endpoint =>
+        axios.get(`${routerUrl}/rest/${endpoint}`, { headers: { Authorization: authHeader } })
+      );
+
+      const responses = await Promise.all(requests);
+      const mergedData = Object.fromEntries(responses.map((response, index) => [endpoints[index], response.data]));
+
+      return mergedData;
+    } catch (error) {
+      console.error('Error fetching all data:', error);
+      throw new HttpException(
+        `Failed to fetch data from endpoints: ${error.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+
 
  // Method to fetch active PPP users and match them with devices in the database
  async countDevice(username: string, password: string, ip: string, port: string) {

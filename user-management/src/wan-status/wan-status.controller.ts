@@ -5,6 +5,11 @@ import { WanStatusService } from './wan-status.service';
 export class WanStatusController {
   constructor(private readonly wanStatusService: WanStatusService) {}
 
+  @Get('all')
+  async findAll() {
+    return this.wanStatusService.findAll();
+  }
+
   @Post()
   async receiveData(
     @Body() data: { identity: string; comment: string; status: string; since: string },

@@ -165,20 +165,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 className="w-full border border-transparent rounded-lg p-3 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
               />
             </div>
-            <div className="mb-4">
-              <label htmlFor="emailId" className="block text-gray-100 font-semibold">
-                EmailId
-              </label>
-              <input
-  id="emailId"
-  type="text"
-  value={emailId}
-  onChange={(e) => setEmailId(e.target.value)} // Use setEmailId here
-  required
-  className="w-full border border-transparent rounded-lg p-3 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
-/>
-
-            </div>
+           
 
             {/* No need for usertype selection since it's fixed to "MANAGER" */}
             <input type="hidden" value="MANAGER" />

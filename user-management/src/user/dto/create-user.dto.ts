@@ -29,7 +29,7 @@ export class CreateUserDto {
   siteId:number
 
   @IsString()
-  emailId:string
+  emailId?:string
 
 
 }

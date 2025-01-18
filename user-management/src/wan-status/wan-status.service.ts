@@ -10,7 +10,21 @@ export class WanStatusService {
     private readonly emailService: EmailService,
   ) {}
 
-  // Function to save WAN status data and handle email alerts
+
+  async findAll() {
+    return this.prisma.mikroTik.findMany({
+      select: {
+        id: true,
+        identity: true,
+        comment: true,
+        status: true,
+        since: true,
+        createdAt: true,
+      },
+    });
+  }
+
+  // Function to save WAN status data and handle email & Telegram alerts
   async saveData(data: {
     identity: string;
     comment: string;
@@ -18,7 +32,6 @@ export class WanStatusService {
     since: string;
   }): Promise<void> {
     try {
-
       // Fetch the most recent record for the given identity and comment
       const previousStatus = await this.prisma.mikroTik.findFirst({
         where: {
@@ -35,7 +48,7 @@ export class WanStatusService {
         });
 
         // Save the new status to the database
-        const newStatus = await this.prisma.mikroTik.create({
+        await this.prisma.mikroTik.create({
           data: {
             identity: data.identity,
             comment: data.comment,
@@ -50,24 +63,18 @@ export class WanStatusService {
           select: { emailId: true }, // Fetch only the emailId field
         });
 
+        const alertMessage = `${data.identity} Gateway's ${data.comment} is ${data.status}`;
+
+        // Trigger email notification
         if (device) {
-
-          // Parse email IDs from JSON field or use them directly if already in array format
           const emailRecipients = this.parseEmailIds(device.emailId);
-
           if (emailRecipients.length > 0) {
-            console.log(
-              `Emails fetched for identity "${data.identity}":`,
-              emailRecipients,
-            );
-
-            // Send email notification about the status change
             await this.emailService.sendEmail({
               recipients: emailRecipients,
-              subject: `${data.identity} Gateway's ${data.comment} is ${data.status}`,
+              subject: alertMessage,
               html: `
                 <div>
-                  <h1>${data.identity} Gateway's ${data.comment} is ${data.status}</h1>
+                  <h1>${alertMessage}</h1>
                   <p>The WAN status has changed to <strong>${data.status}</strong> since ${formattedSince}.</p>
                   <img src="${
                     data.status.toLowerCase() === 'up'
@@ -79,14 +86,11 @@ export class WanStatusService {
                 </div>
               `,
             });
-          } else {
-            console.warn(
-              `No valid email addresses found for identity "${data.identity}".`,
-            );
           }
-        } else {
-          console.warn(`No device found for identity "${data.identity}".`);
         }
+
+        // Trigger Telegram notification
+        await this.sendTelegramAlert(alertMessage);
       }
     } catch (error) {
       console.error('Error in saveData:', error);
@@ -94,14 +98,30 @@ export class WanStatusService {
     }
   }
 
+  // Function to send Telegram alert
+  private async sendTelegramAlert(message: string): Promise<void> {
+    const telegramBotToken = '5812072071:AAEZD1qVjmKBJ9h7f9HQDETeKQ6ffBKRtck';
+    const chatId = '-4609047914'; // Replace with your chat ID
+    const url = `https://api.telegram.org/bot${telegramBotToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(
+      message,
+    )}`;
 
-  
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Failed to send Telegram alert');
+      }
+      console.log('Telegram alert sent successfully');
+    } catch (error) {
+      console.error('Error sending Telegram alert:', error);
+    }
+  }
 
   // Helper function to parse email IDs from JSON or array
   private parseEmailIds(emailId: any): string[] {
     try {
       if (Array.isArray(emailId)) {
-        return emailId; // Directly return the array if emailId is already an array
+        return emailId;
       }
 
       if (typeof emailId === 'string') {
@@ -119,30 +139,27 @@ export class WanStatusService {
     }
   }
 
+  // Fetch logs based on the deviceId (identity)
+  async getLogsByDeviceId(deviceId: string): Promise<any[]> {
+    try {
+      const logs = await this.prisma.mikroTik.findMany({
+        where: {
+          identity: deviceId,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
 
-   // Fetch logs based on the deviceId (identity)
-async getLogsByDeviceId(deviceId: string): Promise<any[]> {
-  try {
-    // Fetch logs from the database where identity matches the deviceId
-    const logs = await this.prisma.mikroTik.findMany({
-      where: {
-        identity: deviceId, // Filter logs using identity matching the deviceId
-      },
-      orderBy: {
-        createdAt: 'desc', // Order logs by creation time (most recent first)
-      },
-    });
-
-    // Map and format the logs in the same way as getLogs function
-    const formattedLogs = logs.map((log) => ({
-      ...log,
-      createdAt: format(new Date(log.createdAt), 'dd/MM/yyyy , HH:mm:ss'), // Format the createdAt date field
-    }));
-
-    return formattedLogs;
-  } catch (error) {
-    // Log the error and rethrow it
-    console.error('Error fetching logs by deviceId:', error);
-    throw new Error('Unable to fetch logs for the specified device. Please try again.');
-  }}
+      return logs.map((log) => ({
+        ...log,
+        createdAt: format(new Date(log.createdAt), 'dd/MM/yyyy , HH:mm:ss'),
+      }));
+    } catch (error) {
+      console.error('Error fetching logs by deviceId:', error);
+      throw new Error(
+        'Unable to fetch logs for the specified device. Please try again.',
+      );
+    }
+  }
 }

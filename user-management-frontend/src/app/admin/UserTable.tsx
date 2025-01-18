@@ -57,7 +57,7 @@ interface User {
     try {
       const response = await fetch(
         `http://localhost:8000/users/ad?adminId=${adminId}`
-      );
+        );
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }

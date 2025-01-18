@@ -9,7 +9,7 @@ import { useAuth } from "../hooks/useAuth";
 import { DeviceUnknown } from "@mui/icons-material";
 import UserTable from "../admin/UserTable";
 
-const Adm: React.FC = () => {
+const AdminDashboard: React.FC = () => {
   const router = useRouter();
   const { changePassword, loading, username } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(true); 
@@ -321,4 +321,4 @@ const Adm: React.FC = () => {
   );
 };
 
-export default Adm;
+export default AdminDashboard;

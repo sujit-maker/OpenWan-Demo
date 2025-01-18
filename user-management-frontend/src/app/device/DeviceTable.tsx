@@ -63,8 +63,14 @@ const DeviceTable: React.FC = () => {
   
       const data = await response.json();
   
-      // Extract the devices array from the response and set it in state
-      setDevices(data.devices); // Assuming 'devices' is an array inside the response
+      // Check if the response is an array or contains a devices array
+      if (Array.isArray(data)) {
+        setDevices(data); // If data is an array
+      } else if (data.devices && Array.isArray(data.devices)) {
+        setDevices(data.devices); // If data contains a 'devices' array
+      } else {
+        throw new Error("Unexpected response structure");
+      }
   
     } catch (error) {
       setError(error instanceof Error ? error.message : "Unknown error");
@@ -73,7 +79,6 @@ const DeviceTable: React.FC = () => {
     }
   };
   
-
   useEffect(() => {
     fetchSites(); 
   }, []);

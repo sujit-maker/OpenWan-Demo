@@ -86,6 +86,8 @@ import { MikroTikService } from 'src/mikrotik/mikrotik.service';
     return this.mikrotikService.fetchAllData(routerUrl, auth);
   }
 
+ 
+
   @Post('count/device')
   async testDevice(@Body() body: { username: string; password: string; ip: string; port: string }) {
     const { username, password, ip, port } = body;
@@ -104,6 +106,19 @@ import { MikroTikService } from 'src/mikrotik/mikrotik.service';
     } catch (error) {
       // Handle errors and send a response
       throw new BadRequestException('Failed to fetch data from the device');
+    }
+  }
+
+  @Post("fetch")
+  async fetchData(@Body() body: { username: string; password: string; ip: string; port: string }) {
+    const { username, password, ip, port } = body;
+    const routerUrl = `http://${ip}:${port}`; // Construct the router URL dynamically using the IP and port from the request body.
+
+    try {
+      const data = await this.mikrotikService.fetchActiveData(routerUrl, { username, password });
+      return data;
+    } catch (error) {
+      throw error; // Error is already handled in the service, but can be rethrown for custom handling here
     }
   }
   

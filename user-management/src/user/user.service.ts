@@ -282,6 +282,8 @@ async countSitesByAdmin(adminId: number): Promise<number> {
       username,
       password: hashedPassword,
       usertype,
+      adminId,
+      managerId,
       customerId,
       siteId,
     };

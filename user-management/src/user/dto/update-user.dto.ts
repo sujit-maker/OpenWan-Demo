@@ -26,5 +26,5 @@ export class UpdateUserDto {
   siteId:number
 
   @IsString()
-  emailId:string
+  emailId?:string
 }
