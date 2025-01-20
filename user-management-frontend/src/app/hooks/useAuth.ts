@@ -84,7 +84,7 @@ export const useAuth = () => {
 
       // Handle EXECUTIVE user redirection
       if (usertype === "EXECUTIVE") {
-        const response = await fetch(`http://localhost:8000/users/${id}/deviceId`);
+        const response = await fetch(`http://122.169.108.252:8000/users/${id}/deviceId`);
         if (response.ok) {
           const data = await response.json();
           const deviceId = data.deviceId;

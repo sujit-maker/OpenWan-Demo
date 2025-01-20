@@ -19,7 +19,7 @@ interface EditCustomerModalProps {
 
   const handleSave = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/customers/${updatedCustomer.id}`, { 
+      const response = await fetch(`http://122.169.108.252:8000/customers/${updatedCustomer.id}`, { 
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedCustomer),

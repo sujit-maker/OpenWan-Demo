@@ -48,7 +48,7 @@ const Dashboard: React.FC = () => {
       try {
         // Fetch device status counts
         const deviceResponse = await axios.post(
-          `http://localhost:8000/devices/count/device`,
+          `http://122.169.108.252:8000/devices/count/device`,
           deviceBody
         );
         setPartialDevice(deviceResponse.data.partialDevices);
@@ -56,7 +56,7 @@ const Dashboard: React.FC = () => {
         // Fetch customer count
         if (userId || currentUserType === "SUPERADMIN") {
           const customerResponse = await axios.get(
-            `http://localhost:8000/users/countCustomers?userIds=${userId || ""}`
+            `http://122.169.108.252:8000/users/countCustomers?userIds=${userId || ""}`
           );
           setCustomerCount(customerResponse.data?.count || customerResponse.data);
         }
@@ -64,12 +64,12 @@ const Dashboard: React.FC = () => {
         // Fetch site count
         if (currentUserType === "ADMIN" && adminId) {
           const siteResponse = await axios.get(
-            `http://localhost:8000/users/managerSitesCount/${managerId}`
+            `http://122.169.108.252:8000/users/managerSitesCount/${managerId}`
           );
           setSiteCount(siteResponse.data?.count || siteResponse.data);
         } else if (userId) {
           const siteResponse = await axios.get(
-            `http://localhost:8000/users/sitesByUserCount/${userId}`
+            `http://122.169.108.252:8000/users/sitesByUserCount/${userId}`
           );
           setSiteCount(siteResponse.data?.count || siteResponse.data);
         }
@@ -77,11 +77,11 @@ const Dashboard: React.FC = () => {
         // Fetch devices
         let deviceEndpoint = "";
         if (currentUserType === "SUPERADMIN") {
-          deviceEndpoint = `http://localhost:8000/devices/all`;
+          deviceEndpoint = `http://122.169.108.252:8000/devices/all`;
         } else if (currentUserType === "ADMIN") {
-          deviceEndpoint = `http://localhost:8000/users/devicesByCustomer/${adminId}`;
+          deviceEndpoint = `http://122.169.108.252:8000/users/devicesByCustomer/${adminId}`;
         } else if (userId) {
-          deviceEndpoint = `http://localhost:8000/devices/user/${userId}`;
+          deviceEndpoint = `http://122.169.108.252:8000/devices/user/${userId}`;
         }
 
         if (deviceEndpoint) {
@@ -94,7 +94,7 @@ const Dashboard: React.FC = () => {
 
           // Fetch online/offline status for the devices
           const fetchResponse = await axios.post(
-            `http://localhost:8000/devices/fetch`,
+            `http://122.169.108.252:8000/devices/fetch`,
             deviceBody
           );
 
@@ -107,7 +107,7 @@ const Dashboard: React.FC = () => {
           let partialCount = 0;
 
           // Fetch WAN status to determine partial or online devices
-          const wanStatusResponse = await axios.get("http://localhost:8000/wanstatus/all");
+          const wanStatusResponse = await axios.get("http://122.169.108.252:8000/wanstatus/all");
           const wanStatuses = wanStatusResponse.data; // WAN status data
 
           deviceIds.forEach((deviceId: string) => {

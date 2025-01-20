@@ -247,7 +247,7 @@ export class MikroTikService {
 
   async fetchInterfaceStatus(deviceIp: string, credentials: { username: string, password: string }): Promise<any[]> {
     // This is a simplified example. You would need to use the MikroTik API or SSH client to fetch the data.
-    const response = await fetch(`http://localhost:8000/devices/${deviceIp}/interface`, {
+    const response = await fetch(`http://122.169.108.252:8000/devices/${deviceIp}/interface`, {
       method: 'GET',
       headers: {
         'Authorization': `Basic ${Buffer.from(`${credentials.username}:${credentials.password}`).toString('base64')}`,

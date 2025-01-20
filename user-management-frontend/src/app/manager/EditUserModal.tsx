@@ -21,7 +21,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, onUserUpdated, clos
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch(`http://localhost:8000/users/${user.id}`, {
+      const response = await fetch(`http://122.169.108.252:8000/users/${user.id}`, {
         method: 'PATCH', // Use PATCH instead of PUT
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

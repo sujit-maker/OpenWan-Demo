@@ -18,7 +18,7 @@ const EditDeviceModal: React.FC<EditDeviceModalProps> = ({
   useEffect(() => {
     const fetchSites = async () => {
       try {
-        const response = await fetch('http://localhost:8000/site');
+        const response = await fetch('http://122.169.108.252:8000/site');
         if (!response.ok) {
           throw new Error('Failed to fetch sites');
         }
@@ -38,7 +38,7 @@ const EditDeviceModal: React.FC<EditDeviceModalProps> = ({
 
   const handleSave = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/devices/${updatedDevice.id}`, {
+      const response = await fetch(`http://122.169.108.252:8000/devices/${updatedDevice.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

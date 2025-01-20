@@ -7,8 +7,8 @@ interface EditUserModalProps {
   closeModal: () => void;
   managers: { id: number; username: string }[];
 }
-
-const EditUserModal: React.FC<EditUserModalProps> = ({ user, onUserUpdated, closeModal, managers }) => {
+   
+  const EditUserModal: React.FC<EditUserModalProps> = ({ user, onUserUpdated, closeModal, managers }) => {
   const [username, setUsername] = useState(user.username);
   const [usertype, setUsertype] = useState(user.usertype);
   const [managerId, setManagerId] = useState<number | null>(user.managerId || null);
@@ -24,7 +24,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, onUserUpdated, clos
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch(`http://localhost:8000/users/${user.id}`, {
+      const response = await fetch(`http://122.169.108.252:8000/users/${user.id}`, {
         method: 'Put',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -32,7 +32,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
     };
 
     try {
-      const response = await fetch('http://localhost:8000/users/register', {
+      const response = await fetch('http://122.169.108.252:8000/users/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

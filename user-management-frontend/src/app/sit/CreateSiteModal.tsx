@@ -94,7 +94,7 @@ const CreateSiteModal: React.FC<CreateSiteModalProps> = ({
     setError(null);
   
     try {
-      const url = `http://localhost:8000/users/customerName/${managerId}`;
+      const url = `http://122.169.108.252:8000/users/customerName/${managerId}`;
   
       const response = await fetch(url);
       if (!response.ok) {
@@ -169,7 +169,7 @@ const CreateSiteModal: React.FC<CreateSiteModalProps> = ({
     }
 
     try {
-      const response = await fetch("http://localhost:8000/site", {
+      const response = await fetch("http://122.169.108.252:8000/site", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

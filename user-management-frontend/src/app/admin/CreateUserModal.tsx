@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import { FaEyeSlash, FaEye } from "react-icons/fa";
 
 interface CreateUserModalProps {
   isOpen: boolean;
@@ -18,37 +19,67 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
 }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [usertype, setUsertype] = useState("MANAGER");  
-  const [emailId, setEmailId] = useState(""); // Fixed state handling
+  const [emailId, setEmailId] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [managers, setManagers] = useState<{ id: number; username: string }[]>([]);
+  const [customers, setCustomers] = useState<{ id: number; customerName: string }[]>([]);
+  const [sites, setSites] = useState<{ id: number; siteName: string }[]>([]);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(null);
+  const [selectedSiteId, setSelectedSiteId] = useState<number | null>(null);
 
-  
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  // Fetch customers when modal opens
   useEffect(() => {
-    const fetchManagers = async () => {
-      if (adminId) {
-        try {
-          const response = await fetch(
-            `http://localhost:8000/users/managers/admin?adminId=${adminId}`
-          );
+    const fetchCustomers = async () => {
+      try {
+        const response = await fetch(`http://122.169.108.252:8000/users/customerName/${adminId}`);
+        if (response.ok) {
           const data = await response.json();
-          if (response.ok) {
-            setManagers(data); 
-          } else {
-            setError(data.message || "Failed to fetch managers.");
-          }
-        } catch (err) {
-          setError("An unexpected error occurred while fetching managers.");
+          // If the response is a single object, wrap it in an array
+          const customersArray = Array.isArray(data) ? data : [data];
+          setCustomers(customersArray);
+        } else {
+          setError("Failed to load customers.");
         }
+      } catch (err) {
+        setError("An error occurred while fetching customers.");
       }
     };
 
     if (isOpen) {
-      fetchManagers();
+      fetchCustomers();
     }
   }, [isOpen, adminId]);
+
+
+
+  // Fetch sites when a customer is selected
+  useEffect(() => {
+    const fetchSites = async () => {
+      if (selectedCustomerId) {
+        try {
+          const response = await fetch(`http://122.169.108.252:8000/site/customer/${selectedCustomerId}`);
+          if (response.ok) {
+            const data = await response.json();
+            setSites(data);
+          } else {
+            setError("Failed to load sites.");
+          }
+        } catch (err) {
+          setError("An error occurred while fetching sites.");
+        }
+      } else {
+        setSites([]);
+      }
+    };
+
+    fetchSites();
+  }, [selectedCustomerId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,14 +87,16 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
     const payload = {
       username,
       password,
-      usertype, 
+      usertype: "MANAGER", // Fixed usertype as "MANAGER"
       emailId,
-      adminId, 
+      adminId,
+      customerId: selectedCustomerId,
+      siteId: selectedSiteId,
     };
 
     try {
       setIsLoading(true);
-      const response = await fetch("http://localhost:8000/users/register", {
+      const response = await fetch("http://122.169.108.252:8000/users/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -73,7 +106,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
 
       const data = await response.json();
       if (response.ok) {
-        setSuccess("User created successfully!"); 
+        setSuccess("Manager created successfully!");
         setError(null);
         onUserCreated();
         resetForm();
@@ -100,7 +133,9 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
   const resetForm = () => {
     setUsername("");
     setPassword("");
-    setUsertype("MANAGER"); 
+    setEmailId("");
+    setSelectedCustomerId(null);
+    setSelectedSiteId(null);
   };
 
   return (
@@ -151,24 +186,87 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 className="w-full border border-transparent rounded-lg p-3 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
               />
             </div>
-            <div className="mb-4">
-              <label htmlFor="password" className="block text-gray-100 font-semibold">
+            <div className="mb-4 relative">
+              <label htmlFor="password" className="block text-sm font-medium text-white">
                 Password
               </label>
               <input
+                type={showPassword ? 'text' : 'password'}
                 id="password"
-                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                autoComplete="password"
+                className={`mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-200
+                          }`}
+                autoComplete="current-password"
+                required
+              />
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute right-2 top-10 text-gray-500 hover:text-blue-500 transition duration-200"
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="email" className="block text-gray-100 font-semibold">
+                Email Id
+              </label>
+              <input
+                id="email"
+                type="text"
+                value={emailId}
+                onChange={(e) => setEmailId(e.target.value)}
                 required
                 className="w-full border border-transparent rounded-lg p-3 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
               />
             </div>
-           
 
-            {/* No need for usertype selection since it's fixed to "MANAGER" */}
-            <input type="hidden" value="MANAGER" />
+            <div className="mb-4">
+              <label htmlFor="customer" className="block text-gray-100 font-semibold">
+                Customer
+              </label>
+              <select
+                id="customer"
+                value={selectedCustomerId || ""}
+                onChange={(e) => setSelectedCustomerId(Number(e.target.value))}
+                className="w-full border border-transparent rounded-lg p-3 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
+              >
+                <option value="">Select Customer</option>
+                {Array.isArray(customers) && customers.length > 0 ? (
+                  customers.map((customer) => (
+                    <option key={customer.id} value={customer.id}>
+                      {customer.customerName}
+                    </option>
+                  ))
+                ) : (
+                  <option value="">No customers available</option>
+                )}
+              </select>
+
+            </div>
+
+            {selectedCustomerId && (
+              <div className="mb-4">
+                <label htmlFor="site" className="block text-gray-100 font-semibold">
+                  Site
+                </label>
+                <select
+                  id="site"
+                  value={selectedSiteId || ""}
+                  onChange={(e) => setSelectedSiteId(Number(e.target.value))}
+                  className="w-full border border-transparent rounded-lg p-3 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
+                >
+                  <option value="">Select Site</option>
+                  {sites.map((site) => (
+                    <option key={site.id} value={site.id}>
+                      {site.siteName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div className="flex justify-end mt-6 space-x-4">
               <button
@@ -180,9 +278,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
               </button>
               <button
                 type="submit"
-                className={`bg-blue-600 text-white rounded px-6 py-3 hover:bg-blue-700 transition-all ${
-                  isLoading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                className={`bg-blue-600 text-white rounded px-6 py-3 hover:bg-blue-700 transition-all ${isLoading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                 disabled={isLoading}
               >
                 {isLoading ? (

@@ -49,7 +49,7 @@ const CreateCustomerModal: React.FC<CreateCustomerModalProps> = ({
   useEffect(() => {
     const fetchAdmins = async () => {
       try {
-        const adminResponse = await fetch("http://localhost:8000/users/admins");
+        const adminResponse = await fetch("http://122.169.108.252:8000/users/admins");
         const adminData: User[] = await adminResponse.json();
         setAdmins(adminData);
       } catch (error) {
@@ -67,7 +67,7 @@ const CreateCustomerModal: React.FC<CreateCustomerModalProps> = ({
       const fetchAdminIdForManager = async () => {
         try {
           const response = await fetch(
-            `http://localhost:8000/users/admins/manager?managerId=${loggedInManagerId}`
+            `http://122.169.108.252:8000/users/admins/manager?managerId=${loggedInManagerId}`
           );
           const data = await response.json();
           setAdminId(data[0]?.id || ""); 
@@ -88,7 +88,7 @@ const CreateCustomerModal: React.FC<CreateCustomerModalProps> = ({
       }
       try {
         const response = await fetch(
-          `http://localhost:8000/users/managers/admin?adminId=${adminId}`
+          `http://122.169.108.252:8000/users/managers/admin?adminId=${adminId}`
         );
         const filteredData: User[] = await response.json();
         setManagers(filteredData); 
@@ -134,7 +134,7 @@ const CreateCustomerModal: React.FC<CreateCustomerModalProps> = ({
     }
 
     try {
-      const response = await fetch("http://localhost:8000/customers", {
+      const response = await fetch("http://122.169.108.252:8000/customers", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

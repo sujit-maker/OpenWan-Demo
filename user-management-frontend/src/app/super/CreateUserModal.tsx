@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import { FaEyeSlash, FaEye } from "react-icons/fa";
 
 interface CreateUserModalProps {
   isOpen: boolean;
@@ -21,7 +22,9 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [usertype, setUsertype] = useState("ADMIN");
-  const [emailId,setEmailId] = useState ("");
+  const [emailId, setEmailId] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
   const [customers, setCustomers] = useState<{ id: number; customerName: string }[]>([]);
   const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(null);
   const [selectedSiteId, setSelectedSiteId] = useState<number | null>(null);
@@ -29,11 +32,15 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   // Fetch customers when modal opens
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const response = await fetch("http://localhost:8000/customers");
+        const response = await fetch("http://122.169.108.252:8000/customers");
         if (response.ok) {
           const data = await response.json();
           setCustomers(data);
@@ -55,7 +62,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
     const fetchSites = async () => {
       if (usertype === "MANAGER" && selectedCustomerId) {
         try {
-          const response = await fetch(`http://localhost:8000/site/customer/${selectedCustomerId}`);
+          const response = await fetch(`http://122.169.108.252:8000/site/customer/${selectedCustomerId}`);
           if (response.ok) {
             const data = await response.json();
             setSites(data); // Set fetched sites based on selected customer
@@ -81,16 +88,16 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
       username,
       password,
       usertype,
-      emailId, 
+      emailId,
       customerId: usertype === "MANAGER" || "ADMIN" ? selectedCustomerId : null,
       siteId: usertype === "MANAGER" || "ADMIN" ? selectedSiteId : null,
     };
-    
+
     console.log(payload);
 
 
     try {
-      const response = await fetch("http://localhost:8000/users/register", {
+      const response = await fetch("http://122.169.108.252:8000/users/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -133,14 +140,14 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
 
   return (
     <Transition show={isOpen} as={React.Fragment}>
-       <Dialog
-         as="div"
-         onClose={onClose}
-         className="fixed inset-0 flex items-center justify-center p-4 bg-black bg-opacity-50 z-[9999] backdrop-blur-md"
-         aria-labelledby="create-user-title"
-         aria-describedby="create-user-description"
-       >
-       <Dialog.Panel className="max-w-sm w-full max-h-[90vh] bg-gradient-to-r from-blue-500 via-indigo-600 to-purple-600 p-6 rounded-lg shadow-xl overflow-y-auto transform transition-transform duration-300 hover:scale-105">
+      <Dialog
+        as="div"
+        onClose={onClose}
+        className="fixed inset-0 flex items-center justify-center p-4 bg-black bg-opacity-50 z-[9999] backdrop-blur-md"
+        aria-labelledby="create-user-title"
+        aria-describedby="create-user-description"
+      >
+        <Dialog.Panel className="max-w-sm w-full max-h-[90vh] bg-gradient-to-r from-blue-500 via-indigo-600 to-purple-600 p-6 rounded-lg shadow-xl overflow-y-auto transform transition-transform duration-300 hover:scale-105">
           <Dialog.Title className="text-xl font-semibold mb-4 text-white text-center">
             Create User
           </Dialog.Title>
@@ -160,15 +167,27 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
               />
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm text-white font-medium mb-1">Password</label>
+            <div className="mb-4 relative">
+              <label htmlFor="password" className="block text-sm font-medium text-white">
+                Password
+              </label>
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
+                id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                className={`mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-200
+                                     }`}
+                autoComplete="current-password"
                 required
-                className="w-full border rounded-lg px-3 py-2"
               />
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute right-2 top-10 text-gray-500 hover:text-blue-500 transition duration-200"
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
             </div>
 
             <div className="mb-4">
@@ -198,7 +217,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
               </select>
             </div>
 
-           
+
 
             {/* Always show customer dropdown */}
             <div className="mb-4">

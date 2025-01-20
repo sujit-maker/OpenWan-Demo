@@ -2,7 +2,7 @@
 
 // Function to log in a user
 export const loginUser = async (username: string, password: string) => {
-  const response = await fetch('http://localhost:8000/auth/login', {
+  const response = await fetch('http://122.169.108.252:8000/auth/login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -22,8 +22,8 @@ export const loginUser = async (username: string, password: string) => {
 
 // Function to change user password
 export const changeUserPassword = async (userId: string, newPassword: string, confirmPassword: string) => {
-  const response = await fetch(`http://localhost:8000/users/${userId}/change-password`, {
-    method: 'PATCH',
+  const response = await fetch(`http://122.169.108.252:8000/users/${userId}/change-password`, {
+    method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },

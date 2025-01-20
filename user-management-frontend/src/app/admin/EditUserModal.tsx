@@ -16,32 +16,21 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
   closeModal,
   onUserUpdated,
   user,
-  currentUserType,
 }) => {
-  const [username, setUsername] = useState(user.username);
-  const [usertype, setUsertype] = useState(user.usertype);
-  const [managerId, setManagerId] = useState<number | null>(user.managerId || null);
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  useEffect(() => {
-    setUsername(user.username);
-    setUsertype(user.usertype);
-    setManagerId(user.managerId || null);
-  }, [user]);
 
-  const userTypeOptions =
-    currentUserType === 'SUPERADMIN' ? ['ADMIN', 'MANAGER', 'EXECUTIVE'] : ['MANAGER', 'EXECUTIVE'];
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const updatedUser = { ...user, username, usertype, managerId, password };
+    const updatedUser = { ...user, password };
 
     try {
-      const response = await fetch(`http://localhost:8000/users/${user.id}`, {
-        method: 'PATCH',
+      const response = await fetch(`http://122.169.108.252:8000/users/${user.id}`, {
+        method: 'Put',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedUser),
       });

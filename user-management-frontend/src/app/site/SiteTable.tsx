@@ -47,11 +47,11 @@ const SitTable: React.FC = () => {
     try {
       let url = "";
       if (currentUserType === "ADMIN" && adminId) {
-        url = `http://localhost:8000/users/sitesByAdmin/${adminId}`;
+        url = `http://122.169.108.252:8000/users/sitesByAdmin/${adminId}`;
       } else if (currentUserType === "MANAGER" && managerId) {
-        url = `http://localhost:8000/users/managerSites/${managerId}`;
+        url = `http://122.169.108.252:8000/users/managerSites/${managerId}`;
       } else if (currentUserType === "SUPERADMIN") {
-        url = "http://localhost:8000/site";
+        url = "http://122.169.108.252:8000/site";
       }
 
       if (!url) {
@@ -82,7 +82,7 @@ const SitTable: React.FC = () => {
   // Function to fetch customers (separate from sites)
   const fetchCustomers = async () => {
     try {
-      const response = await fetch("http://localhost:8000/customers");
+      const response = await fetch("http://122.169.108.252:8000/customers");
       if (!response.ok) {
         console.error(`Failed to fetch customers. Status: ${response.status}`);
         throw new Error("Failed to fetch customers");
@@ -159,7 +159,7 @@ const SitTable: React.FC = () => {
   const handleDelete = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this Site?")) {
       try {
-        const response = await fetch(`http://localhost:8000/site/${id}`, {
+        const response = await fetch(`http://122.169.108.252:8000/site/${id}`, {
           method: "DELETE",
         });
         if (!response.ok) {

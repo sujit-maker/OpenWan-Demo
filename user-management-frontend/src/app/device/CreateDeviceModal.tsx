@@ -66,15 +66,15 @@ const CreateDeviceModal: React.FC<CreateDeviceModalProps> = ({
 
       // Check if userType is ADMIN and adminId is available
       if (userType === "ADMIN" && adminId) {
-        url = `http://localhost:8000/users/sitesByAdmin/${adminId}`;
+        url = `http://122.169.108.252:8000/users/sitesByAdmin/${adminId}`;
       }
       // Check if userType is MANAGER and managerId is available
       else if (userType === "MANAGER" && managerId) {
-        url = `http://localhost:8000/users/managerSites/${managerId}`;
+        url = `http://122.169.108.252:8000/users/managerSites/${managerId}`;
       }
 
       else if (userType === "SUPERADMIN") {
-        url = `http://localhost:8000/site`;
+        url = `http://122.169.108.252:8000/site`;
       }
 
       // If url is built, fetch data
@@ -120,7 +120,7 @@ const CreateDeviceModal: React.FC<CreateDeviceModalProps> = ({
 
     try {
       setIsLoading(true);
-      const response = await fetch("http://localhost:8000/devices", {
+      const response = await fetch("http://122.169.108.252:8000/devices", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

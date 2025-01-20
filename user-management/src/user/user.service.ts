@@ -53,8 +53,6 @@ export class UserService {
     // Return the count of customers for these users
     const customerCount = users.filter(user => user.customer).length;
 
-    console.log(`Fetched ${customerCount} customer(s) for the provided userIds`);
-
     return customerCount;
   }
 
@@ -500,11 +498,7 @@ async countSitesByAdmin(adminId: number): Promise<number> {
     const updatedUser = await this.prisma.user.update({
       where: { id },
       data: {
-        username: updateUserDto.username ?? user.username,
-        usertype: updateUserDto.usertype ?? user.usertype,
         password: hashedPassword,
-        managerId: updateUserDto.managerId ?? user.managerId,
-        adminId: updateUserDto.adminId ?? user.adminId,
       },
     });
 

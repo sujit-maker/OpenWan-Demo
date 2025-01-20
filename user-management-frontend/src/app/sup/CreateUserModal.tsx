@@ -52,7 +52,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
         if (selectedAdminId) {
           try {
             const response = await fetch(
-              `http://localhost:8000/users/managers/admin?adminId=${selectedAdminId}`
+              `http://122.169.108.252:8000/users/managers/admin?adminId=${selectedAdminId}`
             );
             if (response.ok) {
               const data = await response.json();
@@ -68,7 +68,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
 
       const fetchAdmins = async () => {
         try {
-          const response = await fetch("http://localhost:8000/users/admins");
+          const response = await fetch("http://122.169.108.252:8000/users/admins");
           if (response.ok) {
             const data = await response.json();
             setAdmins(data);
@@ -90,7 +90,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
       if (selectedManagerId) {
         try {
           const response = await fetch(
-            `http://localhost:8000/customers?managerId=${selectedManagerId}`
+            `http://122.169.108.252:8000/customers?managerId=${selectedManagerId}`
           );
           if (response.ok) {
             const data = await response.json();
@@ -112,7 +112,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
       if (selectedCustomerId) {
         try {
           const response = await fetch(
-            `http://localhost:8000/site?customer=${selectedCustomerId}`
+            `http://122.169.108.252:8000/site?customer=${selectedCustomerId}`
           );
           if (response.ok) {
             const data = await response.json();
@@ -134,7 +134,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
       if (selectedSiteId) {
         try {
           const response = await fetch(
-            `http://localhost:8000/devices/site/${selectedSiteId}`
+            `http://122.169.108.252:8000/devices/site/${selectedSiteId}`
           );
           if (response.ok) {
             const data = await response.json();
@@ -179,7 +179,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
     };
 
     try {
-      const response = await fetch("http://localhost:8000/users/register", {
+      const response = await fetch("http://122.169.108.252:8000/users/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -91,11 +91,11 @@ const CreateSiteModal: React.FC<CreateSiteModalProps> = ({
   const getCustomerUrl = () => {
     switch (userType) {
       case "MANAGER":
-        return `http://localhost:8000/users/customerName/${managerId}`;
+        return `http://122.169.108.252:8000/users/customerName/${managerId}`;
       case "ADMIN":
-        return `http://localhost:8000/users/customerName/${adminId}`;
+        return `http://122.169.108.252:8000/users/customerName/${adminId}`;
       case "SUPERADMIN":
-        return `http://localhost:8000/customers`;
+        return `http://122.169.108.252:8000/customers`;
       default:
         throw new Error("Unknown user type");
     }
@@ -180,7 +180,7 @@ const CreateSiteModal: React.FC<CreateSiteModalProps> = ({
     }
 
     try {
-      const response = await fetch("http://localhost:8000/site", {
+      const response = await fetch("http://122.169.108.252:8000/site", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

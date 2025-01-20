@@ -46,11 +46,11 @@ const DevTable: React.FC = () => {
     try {
       let url = "";
       if (currentUserType === "ADMIN" && adminId) {
-        url = `http://localhost:8000/devices?adminId=${adminId}`;
+        url = `http://122.169.108.252:8000/devices?adminId=${adminId}`;
       } else if (currentUserType === "MANAGER" && managerId) {
-        url = `http://localhost:8000/devices/user/${managerId}`;
+        url = `http://122.169.108.252:8000/devices/user/${managerId}`;
       } else if (currentUserType === "SUPERADMIN") {
-        url = "http://localhost:8000/devices";
+        url = "http://122.169.108.252:8000/devices";
       }
 
       if (!url) {
@@ -94,7 +94,7 @@ const DevTable: React.FC = () => {
 
   const fetchSites = async () => {
     try {
-      const response = await fetch("http://localhost:8000/site");
+      const response = await fetch("http://122.169.108.252:8000/site");
       if (!response.ok) {
         throw new Error("Failed to fetch sites");
       }
@@ -108,7 +108,7 @@ const DevTable: React.FC = () => {
   const handleDelete = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this device?")) {
       try {
-        const response = await fetch(`http://localhost:8000/devices/${id}`, {
+        const response = await fetch(`http://122.169.108.252:8000/devices/${id}`, {
           method: "DELETE",
         });
         if (!response.ok) {
