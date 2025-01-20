@@ -39,6 +39,13 @@ export class UpdateDeviceDto {
   @IsString({ each: true }) // Validates each item in the array as a string
   emailId?: string[];
 
+  @IsOptional()
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayUnique()
+  @IsString({ each: true }) // Validates each item in the array as a string
+  telegramId?: string[];
+
 
   @IsOptional()
   @IsString()

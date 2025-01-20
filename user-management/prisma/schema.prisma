@@ -13,6 +13,7 @@ model User {
   password   String
   usertype   UserType
   emailId    Json?
+  telegramId Json?
   customerId Int?
   siteId     Int?
   createdAt  DateTime @default(now())
@@ -121,6 +122,7 @@ model Device {
   devicePort     String
   portCount      String
   emailId        Json?
+  telegramId     Json?
   deviceUsername String
   devicePassword String
 

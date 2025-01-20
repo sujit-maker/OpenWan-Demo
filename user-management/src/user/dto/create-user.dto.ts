@@ -31,5 +31,8 @@ export class CreateUserDto {
   @IsString()
   emailId?:string
 
+  @IsString()
+  telegramId?:string
+
 
 }

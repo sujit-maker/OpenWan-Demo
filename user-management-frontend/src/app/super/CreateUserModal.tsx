@@ -23,6 +23,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
   const [password, setPassword] = useState("");
   const [usertype, setUsertype] = useState("ADMIN");
   const [emailId, setEmailId] = useState("");
+  const [telegramId, setTelegramId] = useState("")
   const [showPassword, setShowPassword] = useState(false);
 
   const [customers, setCustomers] = useState<{ id: number; customerName: string }[]>([]);
@@ -89,6 +90,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
       password,
       usertype,
       emailId,
+      telegramId,
       customerId: usertype === "MANAGER" || "ADMIN" ? selectedCustomerId : null,
       siteId: usertype === "MANAGER" || "ADMIN" ? selectedSiteId : null,
     };
@@ -132,6 +134,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
     setPassword("");
     setUsertype("ADMIN");
     setEmailId("");
+    setTelegramId("");
     setSelectedCustomerId(null);
     setSelectedSiteId(null);
     setError(null);
@@ -196,6 +199,17 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 type="text"
                 value={emailId}
                 onChange={(e) => setEmailId(e.target.value)}
+                required
+                className="w-full border rounded-lg px-3 py-2"
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm text-white font-medium mb-1">Telegram Id</label>
+              <input
+                type="text"
+                value={telegramId}
+                onChange={(e) => setTelegramId(e.target.value)}
                 required
                 className="w-full border rounded-lg px-3 py-2"
               />

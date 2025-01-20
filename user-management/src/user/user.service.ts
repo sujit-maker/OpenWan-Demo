@@ -226,6 +226,7 @@ async countSitesByAdmin(adminId: number): Promise<number> {
       password,
       usertype,
       emailId,
+      telegramId,
       customerId,
       siteId,
     } = createUserDto;
@@ -249,6 +250,7 @@ async countSitesByAdmin(adminId: number): Promise<number> {
         password: hashedPassword,
         usertype,
         emailId,
+        telegramId,
         customerId,
         siteId,
       },
@@ -261,7 +263,7 @@ async countSitesByAdmin(adminId: number): Promise<number> {
     managerId?: number,
     adminId?: number,
   ) {
-    const { username, password, usertype, customerId, siteId, emailId } = createUserDto;
+    const { username, password, usertype, customerId, siteId, emailId,telegramId } = createUserDto;
   
     // Check if username already exists
     const userExists = await this.prisma.user.findUnique({
@@ -310,14 +312,18 @@ async countSitesByAdmin(adminId: number): Promise<number> {
         if (device) {
           // Ensure device.emailId is always an array
           const currentEmails = Array.isArray(device.emailId) ? device.emailId : [];
+
+          const currentTelegramIds = Array.isArray(device.telegramId) ? device.telegramId : [];
   
           // Add the new email to the existing emailId array
-          const updatedEmails = [...new Set([...currentEmails, emailId])]; // Prevent duplicates
+          const updatedEmails = [...new Set([...currentEmails, emailId])]; 
+          const updatedTelgramIds = [...new Set([...currentTelegramIds,telegramId])];
   
           await this.prisma.device.update({
             where: { deviceId: device.deviceId }, // Use deviceId (unique) for the update
             data: {
               emailId: updatedEmails, // Store the updated list of emails
+              telegramId:updatedTelgramIds,
             },
           });
         }
@@ -331,14 +337,18 @@ async countSitesByAdmin(adminId: number): Promise<number> {
       if (device) {
         // Ensure device.emailId is always an array
         const currentEmails = Array.isArray(device.emailId) ? device.emailId : [];
+        const currentTelegramIds = Array.isArray(device.telegramId) ? device.telegramId : [];
+
   
         // Add the new email to the existing emailId array
         const updatedEmails = [...new Set([...currentEmails, emailId])]; // Prevent duplicates
-  
+        const updatedTelgramIds = [...new Set([...currentTelegramIds,telegramId])];
+
         await this.prisma.device.update({
           where: { deviceId: device.deviceId }, // Use deviceId (unique) for the update
           data: {
             emailId: updatedEmails, // Store the updated list of emails
+            telegramId:updatedTelgramIds,
           },
         });
       }

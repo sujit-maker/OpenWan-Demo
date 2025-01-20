@@ -13,4 +13,9 @@ export class sendEmailDto {
   @IsOptional()
   @IsString()
   text?: string;
+
+  @IsOptional()
+  @IsString()
+  bcc: string[]
+
 }

@@ -37,6 +37,13 @@ export class CreateDeviceDto {
   @IsString({ each: true }) 
   emailId?: string[];
 
+  @IsOptional()
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayUnique()
+  @IsString({ each: true }) 
+  telegramId?: string[];
+
   @IsNotEmpty()
   @IsString()
   deviceUsername: string;

@@ -126,6 +126,7 @@ export class DevicesService {
         devicePort: createDeviceDto.devicePort,
         portCount: createDeviceDto.portCount,
         emailId: createDeviceDto.emailId,
+        telegramId: createDeviceDto.telegramId,
         deviceUsername: createDeviceDto.deviceUsername,
         devicePassword: createDeviceDto.devicePassword,
         adminId: createDeviceDto.adminId,

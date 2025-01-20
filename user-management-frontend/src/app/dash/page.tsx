@@ -28,7 +28,6 @@ const Dashboard: React.FC = () => {
   const [offlineDevice, setOfflineDevice] = useState<number | null>(null);
   const [partialDevice, setPartialDevice] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
 
   const { currentUserType, userId, managerId } = useAuth();
 
@@ -39,122 +38,137 @@ const Dashboard: React.FC = () => {
     port: "91",
   };
 
-  useEffect(() => {
-    const fetchCounts = async () => {
-      setLoading(true);
-      setError(null);
-  
-      try {
-        // Fetch device status counts
-        const deviceResponse = await axios.post(
-          `http://122.169.108.252:8000/devices/count/device`,
+  // Fetch functions for each card
+  const fetchCustomerCount = async () => {
+    try {
+      if (userId) {
+        const response = await axios.get(
+          `http://122.169.108.252:8000/users/countCustomers?userIds=${userId}`
+        );
+        setCustomerCount(response.data?.count || response.data);
+      }
+    } catch (err) {
+      console.error("Error fetching customer count:", err);
+      setError("Failed to fetch customer count.");
+    }
+  };
+
+  const fetchSiteCount = async () => {
+    try {
+      if (currentUserType === "MANAGER" && managerId) {
+        const response = await axios.get(
+          `http://122.169.108.252:8000/users/managerSitesCount/${managerId}`
+        );
+        setSiteCount(response.data?.count || response.data);
+      } else if (userId) {
+        const response = await axios.get(
+          `http://122.169.108.252:8000/users/sitesByUserCount/${userId}`
+        );
+        setSiteCount(response.data?.count || response.data);
+      }
+    } catch (err) {
+      console.error("Error fetching site count:", err);
+      setError("Failed to fetch site count.");
+    }
+  };
+
+  const fetchDeviceCounts = async () => {
+    try {
+      if (userId) {
+        // Fetch user-specific device count
+        const userDeviceResponse = await axios.get(
+          `http://122.169.108.252:8000/devices/user/${userId}`
+        );
+        const deviceIds = userDeviceResponse.data.devices.map(
+          (device: { deviceId: string }) => device.deviceId
+        );
+        setUserDeviceCount(deviceIds.length);
+
+        // Fetch online/offline status for the user's devices
+        const fetchResponse = await axios.post(
+          `http://122.169.108.252:8000/devices/fetch`,
           deviceBody
         );
-        setPartialDevice(deviceResponse.data.partialDevices);
-  
-        // Fetch customer count based on userId
-        if (userId) {
-          const customerResponse = await axios.get(
-            `http://122.169.108.252:8000/users/countCustomers?userIds=${userId}`
+
+        const fetchedNames = fetchResponse.data["ppp/active"].map(
+          (item: { name: string }) => item.name
+        );
+
+        let onlineCount = 0;
+        let offlineCount = 0;
+        let partialCount = 0;
+
+        // Fetch WAN status to determine partial or online devices
+        const wanStatusResponse = await axios.get(
+          "http://122.169.108.252:8000/wanstatus/all"
+        );
+        const wanStatuses = wanStatusResponse.data; // WAN status data
+
+        deviceIds.forEach((deviceId: string) => {
+          const matchingWanStatuses = wanStatuses.filter(
+            (wan: { identity: string }) => wan.identity === deviceId
           );
-          setCustomerCount(customerResponse.data?.count || customerResponse.data);
-        }
-  
-        // Fetch site count based on managerId or userId
-        if (currentUserType === "MANAGER" && managerId) {
-          const siteResponse = await axios.get(
-            `http://122.169.108.252:8000/users/managerSitesCount/${managerId}`
-          );
-          setSiteCount(siteResponse.data?.count || siteResponse.data);
-        } else if (userId) {
-          const siteResponse = await axios.get(
-            `http://122.169.108.252:8000/users/sitesByUserCount/${userId}`
-          );
-          setSiteCount(siteResponse.data?.count || siteResponse.data);
-        }
-  
-        // Fetch user-specific device count
-        if (userId) {
-          const userDeviceResponse = await axios.get(
-            `http://122.169.108.252:8000/devices/user/${userId}`
-          );
-          const deviceIds = userDeviceResponse.data.devices.map(
-            (device: { deviceId: string }) => device.deviceId
-          );
-          setUserDeviceCount(deviceIds.length);
-  
-          // Fetch online/offline status for the user's devices
-          const fetchResponse = await axios.post(
-            `http://122.169.108.252:8000/devices/fetch`,
-            deviceBody
-          );
-  
-          const fetchedNames = fetchResponse.data['ppp/active'].map(
-            (item: { name: string }) => item.name
-          );
-  
-          let onlineCount = 0;
-          let offlineCount = 0;
-          let partialCount = 0;
-  
-          // Fetch WAN status to determine partial or online devices
-          const wanStatusResponse = await axios.get('http://122.169.108.252:8000/wanstatus/all');
-          const wanStatuses = wanStatusResponse.data; // WAN status data
-  
-          deviceIds.forEach((deviceId: string) => {
-            // Check if the device is online by matching deviceId with identity in WAN status
-            const matchingWanStatuses = wanStatuses.filter(
-              (wan: { identity: string }) => wan.identity === deviceId
+
+          if (matchingWanStatuses.length > 0) {
+            const sortedStatuses = matchingWanStatuses.sort(
+              (a: { createdAt: string }, b: { createdAt: string }) =>
+                new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
             );
-  
-            if (matchingWanStatuses.length > 0) {
-              // Sort WAN statuses by createdAt to get the latest one
-              const sortedStatuses = matchingWanStatuses.sort(
-                (a: { createdAt: string }, b: { createdAt: string }) =>
-                  new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-              );
-  
-              // Now check the latest status of both WAN1 and WAN2
-              let isOnline = true;
-  
-              const latestWAN1 = sortedStatuses.find((wan: { comment: string }) => wan.comment === "WAN1");
-              const latestWAN2 = sortedStatuses.find((wan: { comment: string }) => wan.comment === "WAN2");
-  
-              // If either WAN1 or WAN2 has 'down' status, it's partial
-              if ((latestWAN1 && latestWAN1.status === "down") || (latestWAN2 && latestWAN2.status === "down")) {
-                isOnline = false; // Partial if any WAN is down
-              }
-  
-              if (isOnline) {
-                onlineCount++; // If all WANs are up, the device is online
-              } else {
-                partialCount++; // If any WAN is down, the device is partial
-              }
-            } else {
-              offlineCount++; // If no matching WAN status, the device is offline
+
+            let isOnline = true;
+
+            const latestWAN1 = sortedStatuses.find(
+              (wan: { comment: string }) => wan.comment === "WAN1"
+            );
+            const latestWAN2 = sortedStatuses.find(
+              (wan: { comment: string }) => wan.comment === "WAN2"
+            );
+
+            if (
+              (latestWAN1 && latestWAN1.status === "down") ||
+              (latestWAN2 && latestWAN2.status === "down")
+            ) {
+              isOnline = false;
             }
-          });
-  
-          // Set counts
-          setOnlineDevice(onlineCount);
-          setOfflineDevice(offlineCount);
-          setPartialDevice(partialCount);
-        }
-      } catch (err) {
-        console.error("Error fetching dashboard data:", err);
-        setError("Failed to fetch dashboard data.");
-      } finally {
-        setLoading(false);
+
+            if (isOnline) {
+              onlineCount++;
+            } else {
+              partialCount++;
+            }
+          } else {
+            offlineCount++;
+          }
+        });
+
+        setOnlineDevice(onlineCount);
+        setOfflineDevice(offlineCount);
+        setPartialDevice(partialCount);
       }
-    };
-  
-    fetchCounts();
-    const interval = setInterval(fetchCounts, 5000);
-  
+    } catch (err) {
+      console.error("Error fetching device counts:", err);
+      setError("Failed to fetch device counts.");
+    }
+  };
+
+  // Independent polling for each card
+  useEffect(() => {
+    fetchCustomerCount();
+    const interval = setInterval(fetchCustomerCount, 5000);
     return () => clearInterval(interval);
-  }, [userId, managerId, currentUserType]);
-  
-  
+  }, [userId]);
+
+  useEffect(() => {
+    fetchSiteCount();
+    const interval = setInterval(fetchSiteCount, 5000);
+    return () => clearInterval(interval);
+  }, [currentUserType, userId, managerId]);
+
+  useEffect(() => {
+    fetchDeviceCounts();
+    const interval = setInterval(fetchDeviceCounts, 5000);
+    return () => clearInterval(interval);
+  }, [userId]);
 
   return (
     <div className="flex h-screen">
@@ -168,18 +182,34 @@ const Dashboard: React.FC = () => {
 
           {error && <div className="text-red-500 text-center mb-4">{error}</div>}
 
-          {loading ? (
-            <div className="text-center text-gray-500">Loading...</div>
-          ) : (
-            <div className="flex flex-wrap justify-center gap-6">
-              <Card title="Company Count" count={customerCount} gradient="bg-pink-900" />
-              <Card title="Sites Count" count={siteCount} gradient="bg-pink-900" />
-              <Card title="Devices Count" count={userDeviceCount} gradient="bg-purple-600" />
-              <Card title="Online Devices" count={onlineDevice} gradient="bg-green-600" />
-              <Card title="Partial Devices" count={partialDevice} gradient="bg-blue-800" />
-              <Card title="Offline Devices" count={offlineDevice} gradient="bg-red-600" />
-            </div>
-          )}
+          <div className="flex flex-wrap justify-center gap-6">
+            <Card
+              title="Company Count"
+              count={customerCount}
+              gradient="bg-pink-900"
+            />
+            <Card title="Sites Count" count={siteCount} gradient="bg-pink-900" />
+            <Card
+              title="Devices Count"
+              count={userDeviceCount}
+              gradient="bg-purple-600"
+            />
+            <Card
+              title="Online Devices"
+              count={onlineDevice}
+              gradient="bg-green-600"
+            />
+            <Card
+              title="Partial Devices"
+              count={partialDevice}
+              gradient="bg-blue-800"
+            />
+            <Card
+              title="Offline Devices"
+              count={offlineDevice}
+              gradient="bg-red-600"
+            />
+          </div>
         </div>
       </div>
     </div>
