@@ -80,8 +80,8 @@ async saveData(data: {
         const emailRecipients = this.parseEmailIds(device.emailId);
   if (emailRecipients.length > 0) {
     await this.emailService.sendEmail({
-      recipients: ["waghmaresujit49@gmail.com"], 
-      bcc: emailRecipients,
+      recipients: emailRecipients, 
+      bcc: [],
       subject: alertMessage,
       html: `
         <div>

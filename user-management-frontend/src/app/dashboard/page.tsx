@@ -146,7 +146,7 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     fetchCounts();
 
-    const interval = setInterval(fetchCounts, 5000); // Refresh counts every 5 seconds
+    const interval = setInterval(fetchCounts, 10000); // Refresh counts every 5 seconds
     return () => clearInterval(interval); // Cleanup interval on component unmount
   }, [currentUserType, userId, managerId, adminId]);
 
@@ -165,7 +165,7 @@ const Dashboard: React.FC = () => {
           <div className="flex flex-wrap justify-center gap-6">
             <Card title="Company Count" count={customerCount} gradient="bg-pink-900" />
             <Card title="Sites Count" count={siteCount} gradient="bg-pink-900" />
-            <Card title="Devices Count" count={deviceCount} gradient="bg-purple-600" />
+            <Card title="Devices Count" count={deviceCount} gradient="bg-pink-900" />
             <Card title="Online Devices" count={onlineDevice} gradient="bg-green-600" />
             <Card title="Partial Devices" count={partialDevice} gradient="bg-blue-800" />
             <Card title="Offline Devices" count={offlineDevice} gradient="bg-red-600" />

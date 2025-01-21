@@ -192,7 +192,7 @@ const Dashboard: React.FC = () => {
             <Card
               title="Devices Count"
               count={userDeviceCount}
-              gradient="bg-purple-600"
+              gradient="bg-pink-900"
             />
             <Card
               title="Online Devices"
