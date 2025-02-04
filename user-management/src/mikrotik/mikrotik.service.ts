@@ -91,95 +91,91 @@ export class MikroTikService {
  async countDevice(username: string, password: string, ip: string, port: string) {
   const routerUrl = `http://${ip}:${port}`;
   const auth = { username, password };
-  const endpoints = ['ppp/active'];
+  const endpoint = 'ppp/active';
 
   try {
     const authHeader = this.createAuthHeader(auth);
 
-    // Fetch data from MikroTik's 'ppp/active' endpoint
-    const requests = endpoints.map((endpoint) =>
-      axios.get(`${routerUrl}/rest/${endpoint}`, { headers: { Authorization: authHeader } })
-    );
+    // Fetch active PPP users
+    let activeData = [];
+    try {
+      const response = await axios.get(`${routerUrl}/rest/${endpoint}`, {
+        headers: { Authorization: authHeader },
+      });
+      activeData = response.data;
+    } catch (error) {
+      console.warn('Failed to fetch active PPP users:', error.message);
+      activeData = []; // Proceed with an empty list to prevent function failure
+    }
 
-    const responses = await Promise.all(requests);
-    const activeData = responses[0].data; // Assuming we only need data from 'ppp/active'
+    // Fetch all devices & MikroTik statuses in one query each
+    const [devices, mikrotikStatuses] = await Promise.all([
+      this.prisma.device.findMany(),
+      this.prisma.mikroTik.findMany(),
+    ]);
 
-    // Fetch all devices from the database
-    const devices = await this.prisma.device.findMany();
-
-    // Create a set of active device names (ppp/active names)
+    // Create a set of active device names
     const activeDeviceNames = new Set(activeData.map((user) => user.name));
 
-    // Count the online, offline, and partial devices
-    let onlineCount = 0;
-    let offlineCount = 0;
-    let partialCount = 0;
+    // Organize MikroTik statuses by device identity
+    const mikrotikMap = new Map();
+    for (const status of mikrotikStatuses) {
+      if (!mikrotikMap.has(status.identity)) {
+        mikrotikMap.set(status.identity, []);
+      }
+      mikrotikMap.get(status.identity).push(status);
+    }
 
-    // Iterate over each device in the database
+    let onlineDevices = [];
+    let offlineDevices = [];
+    let partialDevices = [];
+
     for (const device of devices) {
       if (activeDeviceNames.has(device.deviceId)) {
-        // Device is online, check the MikroTik status
-        const mikrotikDevice = await this.prisma.mikroTik.findMany({
-          where: { identity: device.deviceName }, // Assuming deviceName is the correct field
-        });
+        // Device is online, check MikroTik status
+        const mikrotikDeviceStatuses = mikrotikMap.get(device.deviceName) || [];
 
-        if (mikrotikDevice.length > 0) {
-          let isPartial = false;
-
-          // Create a map to hold the latest status of each comment (WAN)
-          const latestStatusByComment: { [key: string]: { status: string, createdAt: Date } } = {};
-
-          // Iterate through each MikroTik status and find the latest status per comment
-          for (const deviceStatus of mikrotikDevice) {
-            const { comment, status, createdAt } = deviceStatus;
-
-            // Parse createdAt to a Date object for comparison
-            const createdAtDate = new Date(createdAt);
-
-            // If there's no status for this comment or the current entry is more recent, update it
-            if (
-              !latestStatusByComment[comment] ||
-              createdAtDate > latestStatusByComment[comment].createdAt
-            ) {
-              latestStatusByComment[comment] = { status, createdAt: createdAtDate };
+        if (mikrotikDeviceStatuses.length > 0) {
+          // Determine latest status for each WAN
+          const latestStatusByComment = mikrotikDeviceStatuses.reduce((acc, { comment, status, createdAt }) => {
+            if (!acc[comment] || new Date(createdAt) > new Date(acc[comment].createdAt)) {
+              acc[comment] = { status, createdAt };
             }
-          }
+            return acc;
+          }, {} as { [key: string]: { status: string; createdAt: Date } });
 
-          // Check the most recent status of each WAN (WAN1, WAN2, etc.)
-          for (const comment of ['WAN1', 'WAN2', 'WAN3', 'WAN4']) {
-            if (latestStatusByComment[comment]?.status === 'down') {
-              isPartial = true; // If any WAN is down, mark as partial
-              break;
-            }
-          }
+          // If any WAN is down, mark as partial
+          const isPartial = ['WAN1', 'WAN2', 'WAN3', 'WAN4'].some(
+            (wan) => latestStatusByComment[wan]?.status === 'down'
+          );
 
           if (isPartial) {
-            partialCount += 1; // Increment partial count if any WAN is down
+            partialDevices.push({ deviceId: device.deviceId, deviceName: device.deviceName });
           } else {
-            onlineCount += 1; // Device is fully online if no WAN is down
+            onlineDevices.push({ deviceId: device.deviceId, deviceName: device.deviceName });
           }
         } else {
-          offlineCount += 1; // Device is online but no MikroTik record found (fallback)
+          offlineDevices.push({ deviceId: device.deviceId, deviceName: device.deviceName }); // No MikroTik record found
         }
       } else {
-        offlineCount += 1; // Device is offline
+        offlineDevices.push({ deviceId: device.deviceId, deviceName: device.deviceName }); // Device is not active
       }
     }
 
-    // Return the count of online, offline, and partial devices
     return {
-      onlineDevices: onlineCount,
-      offlineDevices: offlineCount,
-      partialDevices: partialCount,
+      onlineDevices,
+      offlineDevices,
+      partialDevices,
     };
   } catch (error) {
     console.error('Error fetching active devices:', error);
     throw new HttpException(
       `Failed to fetch active devices or match with the database: ${error.message}`,
-      HttpStatus.BAD_REQUEST,
+      HttpStatus.BAD_REQUEST
     );
   }
 }
+
 
 
 

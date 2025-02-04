@@ -161,7 +161,6 @@ private parseTelegramIds(telegramId: any): string[] {
         return parsedEmails;
       }
 
-      console.warn('Email ID is not a valid string or array:', emailId);
       return [];
     } catch (error) {
       console.error('Error parsing email IDs:', error);

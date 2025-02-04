@@ -87,7 +87,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
     const payload = {
       username,
       password,
-      usertype: "MANAGER", // Fixed usertype as "MANAGER"
+      usertype: "MANAGER", 
       emailId,
       adminId,
       customerId: selectedCustomerId,

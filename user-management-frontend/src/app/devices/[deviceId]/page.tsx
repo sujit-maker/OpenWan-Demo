@@ -44,6 +44,8 @@ interface WanLog {
   createdAt: string;
 }
 
+
+
 const DeviceDetails: React.FC = () => {
   const [deviceData, setDeviceData] = useState<DeviceData | null>(null);
   const { deviceId } = useParams();
@@ -53,6 +55,8 @@ const DeviceDetails: React.FC = () => {
   const [portCount, setPortCount] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(1);
   const entriesPerPage = 6;
+
+  
 
   // Fetch WAN logs
   const fetchWanLogs = useCallback(async () => {
@@ -99,7 +103,11 @@ const DeviceDetails: React.FC = () => {
 
   const indexOfLastEntry = currentPage * entriesPerPage;
   const indexOfFirstEntry = indexOfLastEntry - entriesPerPage;
-  const currentLogs = wanLogs.slice(indexOfFirstEntry, indexOfLastEntry);
+
+  const currentLogs = wanLogs
+  .slice()
+  .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  .slice(indexOfFirstEntry, indexOfLastEntry);
 
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
@@ -284,15 +292,7 @@ const DeviceDetails: React.FC = () => {
             : {}),
         }}
       >
-        {/* <div className="flex justify-end sm:justify-start mx-6 my-0">
-    <button
-      onClick={backme}
-      className="bg-red-600 p-2 w-15 text-white rounded-md"
-      style={{ marginTop: "-30px" }}
-    >
-      Back
-    </button>
-  </div> */}
+       
 
         <h1 className="text-2xl font-bold mb-8 text-center sm:text-left">
           Device Dashboard - {deviceId}
@@ -365,7 +365,7 @@ const DeviceDetails: React.FC = () => {
               className={`bg-${deviceData.wan3.internet.toLowerCase() === "up"
                   ? "green"
                   : "red"
-                }-400 rounded-lg bg-red-500 shadow-2xl p-4 border w-full transform transition duration-300 hover:scale-105 hover:shadow-xl max-w-sm`}
+                }-400 rounded-lg shadow-2xl p-4 border w-full transform transition duration-300 hover:scale-105 hover:shadow-xl max-w-sm`}
             >
               <h2 className="text-lg font-semibold mb-2">WAN 3</h2>
               <p className="text-gray-900">
@@ -382,7 +382,7 @@ const DeviceDetails: React.FC = () => {
               className={`bg-${deviceData.wan4.internet.toLowerCase() === "up"
                   ? "green"
                   : "red"
-                }-400 rounded-lg bg-red-500  shadow-2xl p-4 border w-full transform transition duration-300 hover:scale-105 hover:shadow-xl max-w-sm`}
+                }-400 rounded-lg shadow-2xl p-4 border w-full transform transition duration-300 hover:scale-105 hover:shadow-xl max-w-sm`}
             >
               <h2 className="text-lg font-semibold mb-2">WAN 4</h2>
               <p className="text-gray-900">

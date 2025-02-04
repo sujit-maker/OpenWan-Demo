@@ -21,8 +21,6 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-
-
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
 

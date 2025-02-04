@@ -109,6 +109,39 @@ import { MikroTikService } from 'src/mikrotik/mikrotik.service';
     }
   }
 
+  @Post('device/status')
+async getDeviceStatus(@Body() body: { username: string; password: string; ip: string; port: string }) {
+  const { username, password, ip, port } = body;
+
+  // Validate input
+  if (!username || !password || !ip || !port) {
+    throw new BadRequestException('Missing required fields: username, password, ip, or port');
+  }
+
+  try {
+    // Call countDevice method
+    const deviceStatus = await this.mikrotikService.countDevice(username, password, ip, port);
+    
+    return {
+      onlineDevices: {
+        count: deviceStatus.onlineDevices.length,
+        devices: deviceStatus.onlineDevices,
+      },
+      offlineDevices: {
+        count: deviceStatus.offlineDevices.length,
+        devices: deviceStatus.offlineDevices,
+      },
+      partialDevices: {
+        count: deviceStatus.partialDevices.length,
+        devices: deviceStatus.partialDevices,
+      },
+    };
+  } catch (error) {
+    throw new BadRequestException('Failed to fetch device data: ' + error.message);
+  }
+}
+
+
   @Post("fetch")
   async fetchData(@Body() body: { username: string; password: string; ip: string; port: string }) {
     const { username, password, ip, port } = body;

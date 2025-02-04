@@ -11,7 +11,6 @@ import {
   UnauthorizedException,
   HttpException,
   HttpStatus,
-  NotFoundException,
   Put,
   ParseIntPipe,
 } from '@nestjs/common';

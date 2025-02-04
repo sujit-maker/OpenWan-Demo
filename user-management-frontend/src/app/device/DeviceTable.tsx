@@ -31,7 +31,7 @@ const DeviceTable: React.FC = () => {
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(5); 
+  const [itemsPerPage] = useState(8); 
 
   // Function to fetch sites based on user type
   const fetchDevices = async () => {
@@ -65,7 +65,7 @@ const DeviceTable: React.FC = () => {
   
       // Check if the response is an array or contains a devices array
       if (Array.isArray(data)) {
-        setDevices(data); // If data is an array
+        setDevices(data.reverse()); // If data is an array
       } else if (data.devices && Array.isArray(data.devices)) {
         setDevices(data.devices); // If data contains a 'devices' array
       } else {
@@ -176,9 +176,7 @@ const DeviceTable: React.FC = () => {
     fetchDevices();
   };
 
-  const handleDropdownToggle = (siteId: number) => {
-    setDropdownVisible((prev) => (prev === siteId ? null : siteId)); 
-  };
+ 
 
   const handleDeviceUpdated = (updatedDevice: Device) => {
     setDevices((prev) =>
@@ -305,23 +303,38 @@ const DeviceTable: React.FC = () => {
     </table>
         </div>
         {/* Pagination controls */}
-        <div className="flex justify-center mt-4">
-          <button
-            onClick={() => paginate(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="px-4 py-2 mx-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300"
-          >
-            Prev
-          </button>
-          <span className="px-4 py-2">{currentPage}</span>
-          <button
-            onClick={() => paginate(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 mx-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300"
-          >
-            Next
-          </button>
-        </div>
+       {/* Pagination controls */}
+<div className="flex justify-center mt-4 space-x-2">
+  <button
+    onClick={() => paginate(currentPage - 1)}
+    disabled={currentPage === 1}
+    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300"
+  >
+    Prev
+  </button>
+
+  {/* Display Page Numbers */}
+  {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
+    <button
+      key={number}
+      onClick={() => paginate(number)}
+      className={`px-4 py-2 rounded ${
+        currentPage === number ? "bg-blue-700 text-white" : "bg-gray-200 hover:bg-gray-300"
+      }`}
+    >
+      {number}
+    </button>
+  ))}
+
+  <button
+    onClick={() => paginate(currentPage + 1)}
+    disabled={currentPage === totalPages}
+    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300"
+  >
+    Next
+  </button>
+</div>
+
         {isCreateModalOpen && (
           <CreateDeviceModal
             isOpen={isCreateModalOpen}

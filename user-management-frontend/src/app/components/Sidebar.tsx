@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Home, LineChart, Menu, Package, Users } from "lucide-react";
+import { Home, LineChart, Menu, Package, Ticket, TicketCheckIcon, TicketIcon, TicketPlusIcon, Users } from "lucide-react";
 import { FaLock } from "react-icons/fa";
 import { HiLogout } from "react-icons/hi";
 import { useRouter, usePathname } from "next/navigation";
@@ -288,6 +288,16 @@ const Sidebar: React.FC = () => {
                   >
                     <DeviceUnknown className="h-6 w-6 text-pink-600" />
                     {isSidebarOpen && <span className="text-lg">Gateway</span>}
+                  </button>
+
+                  <button
+                    onClick={() => handleNavigation("/ticket")}
+                    className={`flex items-center gap-4 px-4 py-3 rounded-lg transition-all hover:bg-blue-300 ${
+                      isSidebarOpen ? "justify-start" : "justify-center"
+                    }`}
+                  >
+                    <TicketPlusIcon className="h-6 w-6 text-pink-600" />
+                    {isSidebarOpen && <span className="text-lg">Ticket</span>}
                   </button>
                 </>
             </nav>

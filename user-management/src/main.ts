@@ -13,7 +13,7 @@
   
   app.useGlobalPipes(new ValidationPipe());
   
-  await app.listen(process.env.NEST_APP_PORT || 8000, '0.0.0.0'); 
+  await app.listen(process.env.NEST_APP_PORT || 8000, '0.0.0.0');
 }
   
 bootstrap();

@@ -187,48 +187,6 @@ const CreateCustomerModal: React.FC<CreateCustomerModalProps> = ({
         />
       </div>
   
-      {/* Admin Dropdown */}
-      {/* {userType !== "ADMIN" && userType !== "MANAGER" && (
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-white mb-1">
-            Select Admin
-          </label>
-          <select
-            value={adminId}
-            onChange={(e) => setAdminId(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-          >
-            <option value="">Select Admin</option>
-            {admins.map((admin) => (
-              <option key={admin.id} value={admin.id}>
-                {admin.username}
-              </option>
-            ))}
-          </select>
-        </div>
-      )} */}
-  
-      {/* Manager Dropdown */}
-      {/* {adminId && userType !== "MANAGER" && (
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-white mb-1">
-            Select Manager
-          </label>
-          <select
-            value={managerId}
-            onChange={(e) => setManagerId(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-          >
-            <option value="">Select Manager</option>
-            {managers.map((manager) => (
-              <option key={manager.id} value={manager.id}>
-                {manager.username}
-              </option>
-            ))}
-          </select>
-        </div>
-      )} */}
-  
       <div className="mb-4">
         <label className="block text-sm font-medium text-white mb-1">
           Customer Address

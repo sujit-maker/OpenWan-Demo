@@ -231,19 +231,10 @@ export class SiteService {
   async remove(id: number) {
     const site = await this.prisma.site.findUnique({
       where: { id },
-      include: { tasks: true },  
     });
-  
     if (!site) {
       throw new NotFoundException(`Site with ID ${id} does not exist.`);
     }
-  
-    if (site.tasks.length > 0) {
-      await this.prisma.task.deleteMany({
-        where: { siteId: id },
-      });
-    }
-  
     return this.prisma.site.delete({
       where: { id },
     });

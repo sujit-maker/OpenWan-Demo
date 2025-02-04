@@ -63,7 +63,7 @@ interface User {
       }
 
       const data: User[] = await response.json();
-      console.log(data);
+      
       const loggedInUserId = localStorage.getItem("userId");
 
       const filteredData = data.filter(
@@ -71,7 +71,7 @@ interface User {
           user.username !== "admin" && String(user.id) !== loggedInUserId
       );
 
-      setUsers(filteredData);
+      setUsers(filteredData.reverse());
     } catch (error) {
       console.error("Failed to fetch users:", error);
     }

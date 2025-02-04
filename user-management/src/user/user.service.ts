@@ -79,8 +79,7 @@ export class UserService {
 
     return [site]; // Returning as an array to maintain consistency
   }
-
-
+  
 
   async getSitesByAdmin(adminId: number): Promise<Site[]> {
     // Step 1: Fetch the customerId associated with the given adminId
@@ -181,8 +180,6 @@ async countSitesByAdmin(adminId: number): Promise<number> {
     return sites;
   }
 
-
-
   async getDevicesByCustomerId(userId: number): Promise<Device[]> {
     // Fetch the user and ensure they are associated with a customer
     const user = await this.prisma.user.findUnique({
@@ -216,8 +213,6 @@ async countSitesByAdmin(adminId: number): Promise<number> {
 
     return devices;
   }
-
-
 
 
   async create(createUserDto: CreateUserDto) {
@@ -583,25 +578,7 @@ async countSitesByAdmin(adminId: number): Promise<number> {
     return { message: 'Password updated successfully' };
   }
 
-  async findExecutivesByManager(managerId: number) {
-    const executives = await this.prisma.user.findMany({
-      where: {
-        managerId: managerId,
-        usertype: UserType.EXECUTIVE,
-      },
-      select: {
-        id: true,
-        username: true,
-        usertype: true,
-        managerId: true,
-      },
-    });
-
-    if (executives.length === 0) {
-    }
-
-    return executives;
-  }
+ 
 
   async getUserCountByManagerId(managerId: number): Promise<number> {
     const count = await this.prisma.user.count({
@@ -623,46 +600,7 @@ async countSitesByAdmin(adminId: number): Promise<number> {
     return count;
   }
 
-  async getExecutiveCountByAdminId(adminId: number): Promise<number> {
-    // Get the IDs of executives directly associated with the adminId
-    const directExecutiveIds = await this.prisma.user.findMany({
-      where: {
-        adminId: adminId,
-        usertype: 'EXECUTIVE',
-      },
-      select: { id: true },
-    });
-
-    // Fetch all manager IDs that are associated with the adminId
-    const managers = await this.prisma.user.findMany({
-      where: {
-        adminId: adminId,
-        usertype: 'MANAGER',
-      },
-      select: { id: true }, // Select only the ID of the managers
-    });
-
-    // Extract manager IDs into an array
-    const managerIds = managers.map((manager) => manager.id);
-
-    // Get the IDs of executives associated with the managers
-    const executivesUnderManagersIds = await this.prisma.user.findMany({
-      where: {
-        managerId: { in: managerIds }, // Executives under these managers
-        usertype: 'EXECUTIVE',
-      },
-      select: { id: true },
-    });
-
-    // Combine both sets of executive IDs and remove duplicates
-    const allExecutiveIds = new Set([
-      ...directExecutiveIds.map((e) => e.id),
-      ...executivesUnderManagersIds.map((e) => e.id),
-    ]);
-
-    // Return the total count of unique executives
-    return allExecutiveIds.size;
-  }
+  
 
   async getUserCounts() {
     try {

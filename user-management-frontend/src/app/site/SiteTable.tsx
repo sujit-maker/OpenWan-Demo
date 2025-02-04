@@ -67,7 +67,7 @@ const SitTable: React.FC = () => {
 
       // Wrap single object in an array if needed
       const sitesArray = Array.isArray(data) ? data : [data];
-      setSites(sitesArray); // Set the sites state with the array
+      setSites(sitesArray.reverse()); // Set the sites state with the array
     } catch (error) {
       setError(error instanceof Error ? error.message : "Unknown error");
     } finally {
@@ -234,16 +234,16 @@ const SitTable: React.FC = () => {
           <table className="min-w-full border-collapse bg-white shadow-lg rounded-lg ">
             <thead className="bg-gradient-to-r bg-indigo-800 text-white ">
               <tr>
-                <th className="border px-6 py-3 text-center text-sm font-semibold">
+                <th className="border px-6 py-3 text-center font-semibold">
                   Id
                 </th>
-                <th className="border px-6 py-3 text-center text-sm font-semibold">
+                <th className="border px-6 py-3 text-center font-semibold">
                   Site
                 </th>
-                <th className="border px-6 py-3 text-center text-sm font-semibold">
+                <th className="border px-6 py-3 text-center font-semibold">
                   Customer
                 </th>
-                <th className="border px-6 py-3 text-center text-sm font-semibold">
+                <th className="border px-6 py-3 text-center  font-semibold">
                   Actions
                 </th>
               </tr>
@@ -262,13 +262,13 @@ const SitTable: React.FC = () => {
                     key={site.id}
                     className={`hover:bg-gray-100 transition-colors ${index % 2 === 0 ? "bg-gray-50" : ""}`}
                   >
-                    <td className="border px-4 py-3 text-center text-sm">
+                    <td className="border px-4 py-3 text-center">
                       {site.id}
                     </td>
-                    <td className="border px-4 py-3 text-center text-sm text-gray-800">
+                    <td className="border px-4 py-3 text-center text-gray-800">
                       {site.siteName}
                     </td>
-                    <td className="border px-4 py-3 text-center text-sm text-gray-800">
+                    <td className="border px-4 py-3 text-center text-gray-800">
                       {customer ? customer.customerName : "No customer assigned"}
                     </td>
                     <td className="border p-3 relative flex justify-center items-center">

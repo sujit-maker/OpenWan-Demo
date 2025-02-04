@@ -58,7 +58,7 @@ const UserTable: React.FC = () => {
       const data: User[] = await response.json();
       // Filter out users with the username 'admin'
       const filteredData = data.filter((user) => user.username !== "admin");
-      setUsers(filteredData);
+      setUsers(filteredData.reverse());
     } catch (error) {
       console.error("Failed to fetch users:", error);
     }
@@ -217,10 +217,10 @@ const UserTable: React.FC = () => {
               index % 2 === 0 ? "bg-gray-50" : ""
             }`}
           >
-            <td className="border px-6 py-3 text-sm text-gray-800">
+            <td className="border px-6 py-3  text-gray-800">
               {user.username}
             </td>
-            <td className="border px-6 py-3 text-sm text-gray-800">
+            <td className="border px-6 py-3  text-gray-800">
               {user.usertype}
             </td>
             <td className="border p-3 relative flex justify-center items-center">
