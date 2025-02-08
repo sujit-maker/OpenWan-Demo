@@ -48,7 +48,6 @@ const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
         "http://122.169.108.252:8000/tickets",
         ticketData
       );
-      console.log("Ticket created successfully:", response.data);
       onTicketCreated(); // Call to refresh data or update parent
       onClose(); // Close modal
     } catch (error) {

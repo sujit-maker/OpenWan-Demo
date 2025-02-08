@@ -95,8 +95,6 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
       siteId: usertype === "MANAGER" || "ADMIN" ? selectedSiteId : null,
     };
 
-    console.log(payload);
-
 
     try {
       const response = await fetch("http://122.169.108.252:8000/users/register", {
@@ -221,7 +219,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 value={usertype}
                 onChange={(e) => {
                   setUsertype(e.target.value);
-                  setSelectedCustomerId(null); // Reset selections if usertype changes
+                  setSelectedCustomerId(null); 
                   setSelectedSiteId(null);
                 }}
                 className="w-full border rounded-lg px-3 py-2"
@@ -230,8 +228,6 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 <option value="MANAGER">Manager</option>
               </select>
             </div>
-
-
 
             {/* Always show customer dropdown */}
             <div className="mb-4">
@@ -252,7 +248,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
 
             {usertype === "MANAGER" && selectedCustomerId && (
               <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Site</label>
+                <label className="block text-sm font-medium text-white mb-1">Site</label>
                 <select
                   value={selectedSiteId || ""}
                   onChange={(e) => setSelectedSiteId(Number(e.target.value))}
@@ -267,7 +263,6 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 </select>
               </div>
             )}
-
 
             <div className="mt-6 flex justify-end gap-4">
               <button

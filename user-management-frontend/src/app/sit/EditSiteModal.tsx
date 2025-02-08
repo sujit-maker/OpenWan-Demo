@@ -129,17 +129,6 @@ const EditSiteModal: React.FC<EditSiteModalProps> = ({ isOpen, site, customers, 
           />
         </div>
 
-        {/* Contact Email */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-white mb-1">Contact Email</label>
-          <input
-            type="email"
-            value={updatedSite.contactEmail}
-            onChange={(e) => handleInputChange('contactEmail', e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-          />
-        </div>
-
         {/* Action Buttons */}
         <div className="flex justify-end space-x-2 mt-6">
           <button

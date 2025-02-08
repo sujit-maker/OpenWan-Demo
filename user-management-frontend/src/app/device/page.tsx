@@ -240,7 +240,7 @@ const Dev: React.FC = () => {
 
         {/* Sidebar */}
         <aside
-          className={`h-screen left-0 bg-gradient-to-b from-gray-100 to-gray-300 shadow-lg z-30 py-4 transition-all duration-300 ease-in-out
+          className={`h-screen left-0  fixed bg-gradient-to-b from-gray-100 to-gray-300 shadow-lg z-30 py-4 transition-all duration-300 ease-in-out
           ${
             isMobile
               ? isSidebarOpen

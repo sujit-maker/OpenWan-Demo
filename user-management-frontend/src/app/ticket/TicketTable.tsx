@@ -161,7 +161,7 @@ const TicketTable: React.FC = () => {
             <div
                 className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:pl-72"
                 style={{
-                    marginTop: 80,
+                    marginTop: 40,
                     marginLeft: "-150px",
                     ...(typeof window !== "undefined" && window.innerWidth < 768 ? { position: "fixed", marginLeft: "-275px" } : {}),
                 }}

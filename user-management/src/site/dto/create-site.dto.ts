@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsNotEmpty, IsOptional, IsInt } from 'class-validator';
+import { IsString, IsEmail, IsNotEmpty, IsOptional, IsInt, ArrayUnique, ArrayNotEmpty, IsArray } from 'class-validator';
 
 export class CreateSiteDto {
   @IsNotEmpty()
@@ -20,8 +20,12 @@ export class CreateSiteDto {
   @IsNotEmpty()
   contactNumber: string;
 
-  @IsEmail()
-  contactEmail: string;
+  @IsOptional()
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayUnique()
+  @IsString({ each: true }) 
+  contactEmail: string[];
 
   @IsOptional()
   @IsInt()

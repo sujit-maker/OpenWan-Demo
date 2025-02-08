@@ -62,7 +62,7 @@ model Customer {
   gstNumber       String
   contactName     String
   contactNumber   String
-  email           String
+  email           Json?
   sites           Site[] 
   adminId         Int? 
   managerId       Int? 
@@ -81,7 +81,7 @@ model Site {
   siteAddress   String
   contactName   String
   contactNumber String
-  contactEmail  String
+  contactEmail  Json?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   device        Device[]

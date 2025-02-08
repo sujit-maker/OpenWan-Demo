@@ -6,7 +6,7 @@ interface User {
   id: string; 
   username: string; 
 }
-
+ 
 interface CreateCustomerModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -23,7 +23,7 @@ const CreateCustomerModal: React.FC<CreateCustomerModalProps> = ({
   const [gstNumber, setGstNumber] = useState("");
   const [contactName, setContactName] = useState("");
   const [contactNumber, setContactNumber] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState<string[]>([]); 
   const [adminId, setAdminId] = useState(""); 
   const [managerId, setManagerId] = useState("");
 
@@ -99,6 +99,25 @@ const CreateCustomerModal: React.FC<CreateCustomerModalProps> = ({
 
     fetchFilteredManagers();
   }, [adminId]);
+
+  const handleAddEmail = () => {
+    setEmail((prevEmail) => [...prevEmail, ""]); 
+  };
+
+  const handleRemoveEmail = (index: number) => {
+    setEmail((prevEmail) => prevEmail.filter((_, i) => i !== index)); 
+  };
+
+  const handleEmailChange = (index: number, value: string) => {
+    setEmail((prevEmail) => {
+      const updatedEmail = [...prevEmail];
+      updatedEmail[index] = value;
+      return updatedEmail;
+    });
+  };
+
+
+
   const handleSubmit = async () => {
 
     if (
@@ -106,12 +125,14 @@ const CreateCustomerModal: React.FC<CreateCustomerModalProps> = ({
       !customerAddress ||
       !gstNumber ||
       !contactName ||
-      !contactNumber ||
-      !email
+      !contactNumber
     ) {
       alert("All fields are required!");
       return;
     }
+
+    const cleanedEmail = email.map((email) => String(email).trim()).filter((email) => email !== "");
+
 
     const customerData: any = {
       customerName,
@@ -119,7 +140,7 @@ const CreateCustomerModal: React.FC<CreateCustomerModalProps> = ({
       gstNumber,
       contactName,
       contactNumber,
-      email,
+      email: cleanedEmail, 
       adminId: Number(adminId),
       managerId: Number(managerId),
     };
@@ -171,7 +192,7 @@ const CreateCustomerModal: React.FC<CreateCustomerModalProps> = ({
     <Dialog.Panel className="max-w-sm w-full max-h-[90vh] bg-gradient-to-r from-blue-500 via-indigo-600 to-purple-600 p-6 rounded-lg shadow-xl overflow-y-auto transform transition-transform duration-300 hover:scale-105">
        
       <h2 className="text-2xl font-semibold text-white mb-4 text-center">
-        Add New Company
+        Add Company
       </h2>
   
       {/* Customer details */}
@@ -220,7 +241,7 @@ const CreateCustomerModal: React.FC<CreateCustomerModalProps> = ({
   
       <div className="mb-4">
         <label className="block text-sm font-medium text-white mb-1">
-          Contact Number
+          Contact Number    
         </label>
         <input
           type="text"
@@ -230,15 +251,33 @@ const CreateCustomerModal: React.FC<CreateCustomerModalProps> = ({
         />
       </div>
   
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-white mb-1">Email</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-        />
-      </div>
+      <div className="space-y-2">
+                        {email.map((email, index) => (
+                          <div key={index} className="flex items-center space-x-2">
+                            <input
+                              type="text"
+                              value={email}
+                              onChange={(e) => handleEmailChange(index, e.target.value)}
+                              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                              placeholder={`Email ${index + 1}`}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveEmail(index)}
+                              className="text-white hover:text-red-700"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={handleAddEmail}
+                          className="text-white hover:text-blue-700 mt-2"
+                        >
+                          + Add Email (optional)
+                        </button>
+                      </div>
   
       <div className="flex justify-between mt-6">
         <button

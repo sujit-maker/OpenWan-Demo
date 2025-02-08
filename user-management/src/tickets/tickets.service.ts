@@ -53,7 +53,7 @@ export class TicketsService {
   async getTicketsByUserId(userId: number): Promise<Ticket[]> {
     return this.prisma.ticket.findMany({
       where: {
-        userId: userId, // This filters tickets based on the userId
+        userId: userId, 
       },
     });
   }

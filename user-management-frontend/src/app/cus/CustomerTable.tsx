@@ -1,12 +1,6 @@
-"use client";
+"use client";;
 import React, { useEffect, useRef, useState } from "react";
-import {
-  FaSearch,
-  FaEllipsisV,
-  FaEdit,
-  FaTrash,
-  FaTrashAlt,
-} from "react-icons/fa";
+import { FaSearch, FaEllipsisV, FaEdit, FaTrash, FaTrashAlt } from "react-icons/fa";
 import CreateCustomerModal from "./CreateCustomerModal";
 import EditCustomerModal from "./EditCustomerModal";
 import { Customer } from "./types";
@@ -57,26 +51,29 @@ const CusTable: React.FC = () => {
         url = "http://122.169.108.252:8000/customers"; // Fetch all customers for SUPERADMIN
       }
 
+      // If no valid URL is constructed
       if (!url) {
         throw new Error("Invalid user type or missing user ID");
       }
 
-      const response = await fetch(url);
+      const response = await fetch(url); // Fetch data from the API
       if (!response.ok) {
         throw new Error("Failed to fetch customers");
       }
 
-      const data = await response.json();
-      console.log("Fetched Data: ", data); // Log the data to compare
+      const data = await response.json(); // Parse the response
 
+      // If the API returns a single customer object, wrap it in an array
       const customers = Array.isArray(data) ? data : [data]; // Wrap the data in an array if it's not already
-      setCustomers(customers); // Update state with the array of customers
+
+      setCustomers(customers.reverse()); // Update state with the array of customers
     } catch (error) {
       setError(error instanceof Error ? error.message : "Unknown error");
     } finally {
       setLoading(false); // Stop loading after fetching
     }
   };
+
 
   // Ensure fetchCustomers runs only when currentUserType and userId are available
   useEffect(() => {
@@ -92,9 +89,9 @@ const CusTable: React.FC = () => {
         customers.filter((customer) => {
           const name = customer.customerName?.toLowerCase() ?? "";
           const address = customer.customerAddress?.toLowerCase() ?? "";
-          const email = customer.email?.toLowerCase() ?? "";
+          const email = String(customer.email || "").toLowerCase();
           const query = searchQuery.toLowerCase();
-  
+
           return (
             name.includes(query) || address.includes(query) || email.includes(query)
           );
@@ -104,8 +101,7 @@ const CusTable: React.FC = () => {
       setFilteredCustomers([]); // Reset filtered customers if the list is empty
     }
   }, [searchQuery, customers]); // Runs when searchQuery or customers change
-  
- 
+
   // Handle customer creation
   const handleCustomerCreated = () => {
     fetchCustomers(); // Now calling fetchCustomers here after creation
@@ -181,9 +177,7 @@ const CusTable: React.FC = () => {
         style={{
           marginTop: 80,
           marginLeft: "-150px",
-          ...(typeof window !== "undefined" && window.innerWidth < 768
-            ? { position: "fixed", marginLeft: "-275px" }
-            : {}),
+          ...(typeof window !== "undefined" && window.innerWidth < 768 ? { position: "fixed", marginLeft: "-275px" } : {}),
         }}
       >
         <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
@@ -207,8 +201,8 @@ const CusTable: React.FC = () => {
             />
           </div>
         </div>
-        <div className="lg:overflow-visible">
-          <table className="min-w-full border-collapse bg-white shadow-lg rounded-lg">
+        <div className="lg:overflow-visible" >
+          <table className="min-w-full border-collapse bg-white shadow-lg rounded-lg" >
             <thead className="bg-gradient-to-r bg-indigo-800 text-white">
               <tr>
                 <th className="border p-1">Id</th>
@@ -221,10 +215,8 @@ const CusTable: React.FC = () => {
                 <tr key={customer.id}>
                   <td className="border p-3 text-center">{customer.id}</td>
                   <td className="border p-3 text-center">
-                    {customer.customerName || "N/A"}{" "}
-                    {/* Fallback if customerName is missing */}
+                    {customer.customerName}
                   </td>
-
                   <td className="border p-3 relative flex justify-center items-center">
                     {/* Dropdown Menu */}
                     <DropdownMenu>

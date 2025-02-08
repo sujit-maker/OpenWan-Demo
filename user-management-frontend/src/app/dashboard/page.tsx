@@ -80,20 +80,19 @@ const Dashboard: React.FC = () => {
             deviceResponse.data.offlineDevices.count +
             deviceResponse.data.partialDevices.count
         );
-      } else if (adminId) {  // **ADMIN** logic (fetch devices for a specific admin)
+      } else if (adminId) {  
         const deviceResponseAdmin = await axios.get(
           `http://122.169.108.252:8000/users/devicesByCustomer/${adminId}`
         );
-        const devices = deviceResponseAdmin.data;
+        const devices = deviceResponseAdmin.data || []; 
 
-        console.log("Fetched devices for ADMIN:", devices); // Debugging: log the devices fetched for ADMIN
 
         if (!devices || devices.length === 0) {
           console.log("No devices found for ADMIN");
         }
 
         const deviceIds = devices.map((device: { deviceId: string }) => device.deviceId);
-        console.log("Device IDs for ADMIN:", deviceIds);  // Debugging: log the device IDs
+        
         
         // Fetch WAN status
         const wanStatusResponse = await axios.get("http://122.169.108.252:8000/wanstatus/all");
@@ -105,7 +104,6 @@ const Dashboard: React.FC = () => {
 
         // Classify devices based on WAN status
         devices.forEach((device: { deviceId: string, status: string | undefined }) => {
-          console.log("Device status:", device.status); // Debugging: log the status field for each device
 
           const matchingWanStatuses = wanStatuses.filter(
             (wan: { identity: string }) => wan.identity === device.deviceId
@@ -137,14 +135,13 @@ const Dashboard: React.FC = () => {
           }
         });
 
-        console.log("Online count:", onlineCount);
-        console.log("Offline count:", offlineCount);
-        console.log("Partial count:", partialCount);
 
         // Set categorized devices and counts for ADMIN
         setOnlineDevices(devices.filter((device: { status: string }) => device.status === "online" || !device.status));
         setOfflineDevices(devices.filter((device: { status: string }) => device.status === "offline" || !device.status));
         setPartialDevices(devices.filter((device: { status: string }) => device.status === "partial" || !device.status));
+
+        
 
         setOnlineCount(onlineCount);
         setOfflineCount(offlineCount);
@@ -187,10 +184,10 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     fetchCounts();
-
-    const interval = setInterval(fetchCounts, 10000); // Refresh counts every 10 seconds
-    return () => clearInterval(interval); // Cleanup interval on component unmount
-  }, [currentUserType, userId, managerId, adminId]);
+    const interval = setInterval(fetchCounts, 10000);
+    return () => clearInterval(interval);
+  }, [currentUserType, adminId]);
+  
 
   return (
     <div className="flex h-screen">
@@ -232,44 +229,33 @@ const Dashboard: React.FC = () => {
 
       {/* Modal to show devices */}
       {modalType && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg w-[400px] shadow-lg">
-            <h2 className="text-xl font-semibold mb-4">
-              {modalType.charAt(0).toUpperCase() + modalType.slice(1)} Devices
-            </h2>
-            <ul className="list-disc pl-5 max-h-[300px] overflow-y-auto">
-              {modalType === "online" && onlineDevices.length > 0
-                ? onlineDevices.map((device: Device) => (
-                    <li key={device.deviceId} className="text-gray-700">
-                      {device.deviceId}
-                    </li>
-                  ))
-                : modalType === "offline" && offlineDevices.length > 0
-                ? offlineDevices.map((device: Device) => (
-                    <li key={device.deviceId} className="text-gray-700">
-                      {device.deviceId}
-                    </li>
-                  ))
-                : modalType === "partial" && partialDevices.length > 0
-                ? partialDevices.map((device: Device) => (
-                    <li key={device.deviceId} className="text-gray-700">
-                      {device.deviceId}
-                    </li>
-                  ))
-                : null}
-              {(!onlineDevices.length && modalType === "online") ||
-              (!offlineDevices.length && modalType === "offline") ||
-              (!partialDevices.length && modalType === "partial") ? (
-                <li className="text-gray-500">No devices</li>
-              ) : null}
-            </ul>
-            <button className="mt-4 bg-red-500 text-white px-4 py-2 rounded" onClick={() => setModalType(null)}>
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+    <div className="bg-white p-6 rounded-lg w-[400px] shadow-lg">
+      <h2 className="text-xl font-semibold mb-4">
+        {modalType.charAt(0).toUpperCase() + modalType.slice(1)} Devices
+      </h2>
+      <ul className="list-disc pl-5 max-h-[300px] overflow-y-auto">
+        {modalType === "online" && onlineCount === 0 ? (
+          <li className="text-gray-500">No devices</li>
+        ) : modalType === "offline" && offlineCount === 0 ? (
+          <li className="text-gray-500">No devices</li>
+        ) : modalType === "partial" && partialCount === 0 ? (
+          <li className="text-gray-500">No devices</li>
+        ) : (
+          (modalType === "online" ? onlineDevices :
+           modalType === "offline" ? offlineDevices :
+           partialDevices).map((device) => (
+            <li key={device.deviceId} className="text-gray-700">{device.deviceId}</li>
+          ))
+        )}
+      </ul>
+      <button className="mt-4 bg-red-500 text-white px-4 py-2 rounded" onClick={() => setModalType(null)}>
+        Close
+      </button>
     </div>
+  </div>
+)}
+</div>
   );
 };
 

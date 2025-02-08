@@ -89,7 +89,6 @@ const SitTable: React.FC = () => {
         throw new Error("Failed to fetch customers");
       }
       const data: Customer[] = await response.json();
-      console.log("Fetched customers:", data); // Log customers data
       setCustomers(data);
     } catch (error) {
       console.error("Error fetching customers:", error);

@@ -23,7 +23,6 @@ const CreateSiteModal: React.FC<CreateSiteModalProps> = ({
   const [siteAddress, setSiteAddress] = useState("");
   const [contactName, setContactName] = useState("");
   const [contactNumber, setContactNumber] = useState("");
-  const [contactEmail, setContactEmail] = useState("");
   const [customerId, setCustomerId] = useState<number | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedAdminId, setSelectedAdminId] = useState<string>("");
@@ -131,7 +130,6 @@ const CreateSiteModal: React.FC<CreateSiteModalProps> = ({
       !siteAddress ||
       !contactName ||
       !contactNumber ||
-      !contactEmail ||
       !customerId
     ) {
       alert("All fields are required!");
@@ -143,7 +141,6 @@ const CreateSiteModal: React.FC<CreateSiteModalProps> = ({
       siteAddress,
       contactName,
       contactNumber,
-      contactEmail,
       customerId: Number(customerId),
       adminId:
         currentUserType === "SUPERADMIN"
@@ -199,7 +196,6 @@ const CreateSiteModal: React.FC<CreateSiteModalProps> = ({
     setSiteAddress("");
     setContactName("");
     setContactNumber("");
-    setContactEmail("");
     setCustomerId(null);
     setManagerId("");
   };
@@ -296,18 +292,6 @@ const CreateSiteModal: React.FC<CreateSiteModalProps> = ({
               type="text"
               value={contactNumber}
               onChange={(e) => setContactNumber(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-white mb-1">
-              Contact Email
-            </label>
-            <input
-              type="email"
-              value={contactEmail}
-              onChange={(e) => setContactEmail(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             />
           </div>

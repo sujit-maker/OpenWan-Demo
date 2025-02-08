@@ -100,18 +100,6 @@ const Sup: React.FC = () => {
     setIsSidebarOpen((prevState) => !prevState);
   };
 
-  const toggleDropdown = (event: React.MouseEvent) => {
-    event.stopPropagation();  // Stop event propagation to avoid outside click from closing the dropdown
-    console.log("Dropdown clicked");  // Debugging: Log when the dropdown is clicked
-    console.log(username)
-  
-    // Toggle the dropdown state and log the updated state
-    setIsDropdownOpen((prev) => {
-      console.log("Previous Dropdown State: ", prev);  // Debugging: Log previous state
-      return !prev;
-    });
-  };
-  
 
 
   const handleChangePassword = async () => {

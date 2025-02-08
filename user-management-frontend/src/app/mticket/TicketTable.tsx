@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { FaSearch, FaEllipsisV, FaEdit, FaTrashAlt, FaEye } from "react-icons/fa";
 import CreateTicketModal from "./CreateTicketModal";
 import EditTicketModal from "./EditTicketModal";
-import { Ticket } from "./types"; // Define your ticket type in types.ts
+import { Ticket } from "./types"; 
 import { useAuth } from "../hooks/useAuth";
 import {
     DropdownMenu,
@@ -11,7 +11,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import Sidebar from "../components/Sidebar";
+import Sidebar from "../man/sidebar";
 import ReadTicketModal from "./ReadTicketModal";
 
 const TicketTable: React.FC = () => {
@@ -137,7 +137,7 @@ const TicketTable: React.FC = () => {
             <div
                 className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:pl-72"
                 style={{
-                    marginTop: 80,
+                    marginTop: 40,
                     marginLeft: "-150px",
                     ...(typeof window !== "undefined" && window.innerWidth < 768 ? { position: "fixed", marginLeft: "-275px" } : {}),
                 }}

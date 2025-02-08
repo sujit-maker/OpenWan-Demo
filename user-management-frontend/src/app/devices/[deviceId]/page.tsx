@@ -61,22 +61,18 @@ const DeviceDetails: React.FC = () => {
   // Fetch WAN logs
   const fetchWanLogs = useCallback(async () => {
     try {
-      console.log("Fetching WAN logs...");
       if (!deviceId) {
         console.error("Device ID is missing!");
         return;
       }
 
       const response = await fetch(`http://122.169.108.252:8000/wanstatus/${deviceId}`);
-      console.log("WAN log response status: ", response.status); // Log status
       if (!response.ok) throw new Error(`Failed to fetch WAN logs, Status: ${response.status}`);
 
       const data = await response.json();
-      console.log("WAN logs fetched:", data); // Log the entire response
 
       // Check the data structure directly here
       if (Array.isArray(data)) {
-        console.log("WAN logs are in array format.");
         setWanLogs(data);  // Set WAN logs correctly
         setShowLogs(true);
       } else {
@@ -276,7 +272,6 @@ const DeviceDetails: React.FC = () => {
       </div>
     );
   }
-  console.log("Current WAN logs:", wanLogs);
 
   return (
     <>

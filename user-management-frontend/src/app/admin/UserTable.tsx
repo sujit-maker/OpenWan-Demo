@@ -91,12 +91,6 @@ interface User {
   };
 
   const handleDelete = async (id: number, username: string) => {
-    // Prevent deletion of the super admin
-    if (username === "admin") {
-      alert("SuperAdmin user cannot be deleted!");
-      return;
-    }
-
     const confirmDelete = confirm(
       `Are you sure you want to delete user ${username}?`
     );

@@ -1,12 +1,18 @@
-  import { IsOptional, IsInt } from "class-validator";
+import { IsOptional, IsInt, ArrayNotEmpty, ArrayUnique, IsArray, IsString } from "class-validator";
 
-  export class CreateCustomerDto {
+export class CreateCustomerDto {
   customerName: string;
   customerAddress: string;
   gstNumber: string;
   contactName: string;
   contactNumber: string;
-  email: string;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayUnique()
+  @IsString({ each: true })
+  email?: string[];
 
   @IsOptional()
   @IsInt()

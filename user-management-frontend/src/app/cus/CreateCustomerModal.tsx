@@ -2,7 +2,6 @@
 import { Transition, Dialog } from "@headlessui/react";
 import React, { useState, useEffect } from "react";
 
-// Define the User type for the manager data
 interface User {
   id: string; 
   username: string; 
@@ -24,9 +23,9 @@ const CreateCustomerModal: React.FC<CreateCustomerModalProps> = ({
   const [gstNumber, setGstNumber] = useState("");
   const [contactName, setContactName] = useState("");
   const [contactNumber, setContactNumber] = useState("");
-  const [email, setEmail] = useState("");
-  const [adminId, setAdminId] = useState("");
-  const [managerId, setManagerId] = useState(""); 
+  const [email, setEmail] = useState<string[]>([]); 
+  const [adminId, setAdminId] = useState(""); 
+  const [managerId, setManagerId] = useState("");
 
   const [admins, setAdmins] = useState<User[]>([]);
   const [managers, setManagers] = useState<User[]>([]);
@@ -35,14 +34,12 @@ const CreateCustomerModal: React.FC<CreateCustomerModalProps> = ({
   const loggedInAdminId = localStorage.getItem("adminId");
   const loggedInManagerId = localStorage.getItem("managerId"); 
 
-  // Automatically set adminId for ADMIN users and fetch managers
   useEffect(() => {
     if (userType === "ADMIN" && loggedInAdminId) {
       setAdminId(loggedInAdminId); 
     }
   }, [userType, loggedInAdminId]);
 
-  // If the user is a MANAGER, pre-fill managerId from localStorage
   useEffect(() => {
     if (userType === "MANAGER" && loggedInManagerId) {
       setManagerId(loggedInManagerId);
@@ -50,7 +47,6 @@ const CreateCustomerModal: React.FC<CreateCustomerModalProps> = ({
   }, [userType, loggedInManagerId]);
 
   useEffect(() => {
-    // Fetch all admins (if needed for superadmin users)
     const fetchAdmins = async () => {
       try {
         const adminResponse = await fetch("http://122.169.108.252:8000/users/admins");
@@ -61,7 +57,6 @@ const CreateCustomerModal: React.FC<CreateCustomerModalProps> = ({
       }
     };
 
-    // Only fetch admins if the user is not ADMIN
     if (userType !== "ADMIN") {
       fetchAdmins();
     }
@@ -85,11 +80,10 @@ const CreateCustomerModal: React.FC<CreateCustomerModalProps> = ({
     }
   }, [loggedInManagerId, userType]);
 
-  // Fetch managers associated with a specific adminId
   useEffect(() => {
     const fetchFilteredManagers = async () => {
       if (!adminId) {
-        setManagers([]); 
+        setManagers([]);
         return;
       }
       try {
@@ -104,44 +98,63 @@ const CreateCustomerModal: React.FC<CreateCustomerModalProps> = ({
     };
 
     fetchFilteredManagers();
-  }, [adminId]); 
+  }, [adminId]);
+
+  const handleAddEmail = () => {
+    setEmail((prevEmail) => [...prevEmail, ""]); 
+  };
+
+  const handleRemoveEmail = (index: number) => {
+    setEmail((prevEmail) => prevEmail.filter((_, i) => i !== index)); 
+  };
+
+  const handleEmailChange = (index: number, value: string) => {
+    setEmail((prevEmail) => {
+      const updatedEmail = [...prevEmail];
+      updatedEmail[index] = value;
+      return updatedEmail;
+    });
+  };
+
+
 
   const handleSubmit = async () => {
-    // Validation for required fields
+
     if (
       !customerName ||
       !customerAddress ||
       !gstNumber ||
       !contactName ||
-      !contactNumber ||
-      !email
+      !contactNumber
     ) {
       alert("All fields are required!");
       return;
     }
 
-    // Prepare the customer data
+    const cleanedEmail = email.map((email) => String(email).trim()).filter((email) => email !== "");
+
+
     const customerData: any = {
       customerName,
       customerAddress,
       gstNumber,
       contactName,
       contactNumber,
-      email,
+      email: cleanedEmail, 
       adminId: Number(adminId),
       managerId: Number(managerId),
     };
 
     // If the user is a MANAGER, automatically include the managerId (do not require the manager to select)
     if (userType === "MANAGER" && loggedInManagerId) {
-      customerData.managerId = Number(loggedInManagerId);
-      customerData.adminId = Number(adminId);
+      customerData.managerId = Number(loggedInManagerId); // Use the logged-in manager's ID directly
+      customerData.adminId = Number(adminId); // Include the adminId associated with the manager
     } else if (userType !== "MANAGER" && managerId && managerId !== "") {
-      customerData.managerId = Number(managerId); 
+      // For Admins and other user types, use the selected managerId from the dropdown
+      customerData.managerId = Number(managerId); // Ensure managerId is a number
     }
 
     try {
-      // POST request to the backend to create the customer
       const response = await fetch("http://122.169.108.252:8000/customers", {
         method: "POST",
         headers: {
@@ -156,7 +169,7 @@ const CreateCustomerModal: React.FC<CreateCustomerModalProps> = ({
         alert("Failed to create customer: " + errorText);
       } else {
         alert("Customer created successfully!");
-        onCustomerCreated();
+        onCustomerCreated(); 
         onClose(); 
       }
     } catch (error) {
@@ -179,7 +192,7 @@ const CreateCustomerModal: React.FC<CreateCustomerModalProps> = ({
     <Dialog.Panel className="max-w-sm w-full max-h-[90vh] bg-gradient-to-r from-blue-500 via-indigo-600 to-purple-600 p-6 rounded-lg shadow-xl overflow-y-auto transform transition-transform duration-300 hover:scale-105">
        
       <h2 className="text-2xl font-semibold text-white mb-4 text-center">
-        Add New Customer
+        Add Company
       </h2>
   
       {/* Customer details */}
@@ -194,48 +207,6 @@ const CreateCustomerModal: React.FC<CreateCustomerModalProps> = ({
           className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
         />
       </div>
-  
-      {/* Admin Dropdown */}
-      {userType !== "ADMIN" && userType !== "MANAGER" && (
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-white mb-1">
-            Select Admin
-          </label>
-          <select
-            value={adminId}
-            onChange={(e) => setAdminId(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-          >
-            <option value="">--Select Admin--</option>
-            {admins.map((admin) => (
-              <option key={admin.id} value={admin.id}>
-                {admin.username}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-  
-      {/* Manager Dropdown */}
-      {adminId && userType !== "MANAGER" && (
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-white mb-1">
-            Select Manager
-          </label>
-          <select
-            value={managerId}
-            onChange={(e) => setManagerId(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-          >
-            <option value="">--Select Manager--</option>
-            {managers.map((manager) => (
-              <option key={manager.id} value={manager.id}>
-                {manager.username}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
   
       <div className="mb-4">
         <label className="block text-sm font-medium text-white mb-1">
@@ -280,15 +251,33 @@ const CreateCustomerModal: React.FC<CreateCustomerModalProps> = ({
         />
       </div>
   
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-white mb-1">Email</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-        />
-      </div>
+      <div className="space-y-2">
+                        {email.map((email, index) => (
+                          <div key={index} className="flex items-center space-x-2">
+                            <input
+                              type="text"
+                              value={email}
+                              onChange={(e) => handleEmailChange(index, e.target.value)}
+                              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                              placeholder={`Email ${index + 1}`}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveEmail(index)}
+                              className="text-white hover:text-red-700"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={handleAddEmail}
+                          className="text-white hover:text-blue-700 mt-2"
+                        >
+                          + Add Email (optional)
+                        </button>
+                      </div>
   
       <div className="flex justify-between mt-6">
         <button

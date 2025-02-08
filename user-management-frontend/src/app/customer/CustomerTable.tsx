@@ -89,7 +89,7 @@ const CustomerTable: React.FC = () => {
         customers.filter((customer) => {
           const name = customer.customerName?.toLowerCase() ?? "";
           const address = customer.customerAddress?.toLowerCase() ?? "";
-          const email = customer.email?.toLowerCase() ?? "";
+          const email = String(customer.email || "").toLowerCase();
           const query = searchQuery.toLowerCase();
 
           return (

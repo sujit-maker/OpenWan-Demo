@@ -88,7 +88,6 @@ const SitTable: React.FC = () => {
         throw new Error("Failed to fetch customers");
       }
       const data: Customer[] = await response.json();
-      console.log("Fetched customers:", data); // Log customers data
       setCustomers(data);
     } catch (error) {
       console.error("Error fetching customers:", error);
@@ -117,10 +116,6 @@ const SitTable: React.FC = () => {
     );
   }, [searchQuery, sites]);
 
-  useEffect(() => {
-    console.log("Sites data:", sites); // Log the fetched sites
-    console.log("Filtered sites data:", filteredSites); // Log the filtered sites
-  }, [sites, filteredSites]);
 
   const handleSiteCreated = (site: Site) => {
     setSites((prevSites) => [...prevSites, site]);
@@ -254,9 +249,6 @@ const SitTable: React.FC = () => {
                   (customer) => customer.id === site.customerId
                 );
 
-                console.log("Customer ID from site:", site.customerId); // Log customer ID from site
-                console.log("Found customer:", customer); // Log found customer
-
                 return (
                   <tr
                     key={site.id}
@@ -312,7 +304,7 @@ const SitTable: React.FC = () => {
         </div>
 
         {/* Pagination */}
-        <div className="mt-4 flex justify-center">
+        <div className="mt-4 flex justify-center space-x-2">
           <button
             onClick={() => paginate(currentPage - 1)}
             disabled={currentPage === 1}

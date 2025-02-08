@@ -28,7 +28,6 @@ const ReadTicketModal: React.FC<ReadTicketModalProps> = ({
           `http://122.169.108.252:8000/tickets/${ticketId}`
         );
         const data = await response.json();
-        console.log(data);
         if (data) {
           setTicketNo(data.ticketNo);
           setCategory(data.category);
